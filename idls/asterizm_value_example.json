@@ -1,0 +1,382 @@
+{
+  "address": "AsWKK9AMhadUi2GX7BptSCqyhLJBeCXoKbytoF28AuKR",
+  "metadata": {
+    "name": "asterizm_value_example",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "create_value_client",
+      "discriminator": [
+        90,
+        85,
+        58,
+        2,
+        197,
+        193,
+        251,
+        76
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "value_client_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  116,
+                  101,
+                  114,
+                  105,
+                  122,
+                  109,
+                  45,
+                  118,
+                  97,
+                  108,
+                  117,
+                  101,
+                  45,
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "receive_message",
+      "discriminator": [
+        38,
+        144,
+        127,
+        225,
+        31,
+        225,
+        238,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "client_program",
+          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+        },
+        {
+          "name": "client_settings_account"
+        },
+        {
+          "name": "client_account",
+          "writable": true
+        },
+        {
+          "name": "transfer_account",
+          "writable": true
+        },
+        {
+          "name": "client_trusted_address"
+        },
+        {
+          "name": "client_sender"
+        },
+        {
+          "name": "chain_account"
+        },
+        {
+          "name": "relayer_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "src_chain_id",
+          "type": "u64"
+        },
+        {
+          "name": "src_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "tx_id",
+          "type": "u32"
+        },
+        {
+          "name": "payload",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "send_message",
+      "discriminator": [
+        57,
+        40,
+        34,
+        178,
+        189,
+        10,
+        65,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "authority"
+        },
+        {
+          "name": "value_client_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  116,
+                  101,
+                  114,
+                  105,
+                  122,
+                  109,
+                  45,
+                  118,
+                  97,
+                  108,
+                  117,
+                  101,
+                  45,
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "client_program",
+          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+        },
+        {
+          "name": "client_settings_account"
+        },
+        {
+          "name": "client_account",
+          "writable": true
+        },
+        {
+          "name": "trusted_address"
+        },
+        {
+          "name": "transfer_account",
+          "writable": true
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "chain_account"
+        },
+        {
+          "name": "relayer_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "dst_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "dst_chain_id",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ClientAccount",
+      "discriminator": [
+        26,
+        201,
+        250,
+        54,
+        95,
+        18,
+        189,
+        116
+      ]
+    },
+    {
+      "name": "ClientTrustedAddress",
+      "discriminator": [
+        225,
+        105,
+        197,
+        233,
+        93,
+        223,
+        5,
+        154
+      ]
+    },
+    {
+      "name": "ValueClientAccount",
+      "discriminator": [
+        249,
+        19,
+        190,
+        201,
+        247,
+        169,
+        244,
+        32
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "ClientAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "is_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "tx_id",
+            "type": "u32"
+          },
+          {
+            "name": "user_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "relay_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "notify_transfer_sending_result",
+            "type": "bool"
+          },
+          {
+            "name": "disable_hash_validation",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClientTrustedAddress",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "is_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "user_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "chain_id",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ValueClientAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "is_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "tx_id",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}
