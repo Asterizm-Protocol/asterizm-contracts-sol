@@ -153,3 +153,11 @@ Scripts folder contains useful scripts to configure `Solana` programs. To run us
 ```bash
 npx ts-node scripts/<..>.ts
 ```
+
+## Problems
+
+1. Fixed "account data too small for instruction"
+
+```bash
+solana program extend <progrem_id> <more_bytes>
+```
