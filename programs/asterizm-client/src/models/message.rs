@@ -27,7 +27,7 @@ pub struct TransferAccount {
 pub struct InitiateTransferEvent {
     pub dst_chain_id: u64,
     pub trusted_address: Pubkey,
-    pub id: u32,
+    pub id: [u8; 16],
     pub transfer_hash: [u8; 32],
     pub payload: Vec<u8>,
 }
@@ -75,7 +75,7 @@ pub struct InitMessage {
     pub src_address: Pubkey,
     pub dst_chain_id: u64,
     pub dst_address: Pubkey,
-    pub tx_id: u32,
+    pub tx_id: u128,
     pub payload: Vec<u8>,
 }
 
@@ -88,7 +88,7 @@ pub fn serialize_init_message_eth(message: InitMessage) -> Vec<u8> {
     word[64..96].copy_from_slice(&message.src_address.to_bytes());
     word[(128 - 8)..128].copy_from_slice(&message.dst_chain_id.to_be_bytes());
     word[128..160].copy_from_slice(&message.dst_address.to_bytes());
-    word[(192 - 4)..192].copy_from_slice(&message.tx_id.to_be_bytes());
+    word[(192 - 16)..192].copy_from_slice(&message.tx_id.to_be_bytes());
     word[(224 - 4)..224].copy_from_slice(&192u32.to_be_bytes());
     word[(256 - 4)..256].copy_from_slice(&(message.payload.len() as u32).to_be_bytes());
 
@@ -122,11 +122,11 @@ pub fn build_crosschain_hash(_packed: &[u8]) -> [u8; 32] {
 }
 
 #[derive(Accounts)]
-#[instruction(user_address: Pubkey, dst_chain_id: u64, _tx_id: u32, transfer_hash: [u8; 32],)]
+#[instruction(user_address: Pubkey, dst_chain_id: u64, _tx_id: u128, transfer_hash: [u8; 32],)]
 pub struct SendMessage<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
-    #[account(mut,
+    #[account(
         seeds = ["client".as_bytes(), &user_address.to_bytes()],
         bump = client_account.bump
     )]
@@ -205,8 +205,78 @@ impl<'a, 'b, 'c, 'info> From<&mut SendMessage<'info>>
     }
 }
 
+
 #[derive(Accounts)]
-#[instruction(_dst_address: Pubkey, src_address: Pubkey, src_chain_id: u64, _tx_id: u32, transfer_hash: [u8; 32],)]
+#[instruction(user_address: Pubkey, transfer_hash: [u8; 32])]
+pub struct ResendMessage<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+        seeds = ["client".as_bytes(), &user_address.to_bytes()],
+        bump = client_account.bump
+    )]
+    pub client_account: Box<Account<'info, ClientAccount>>,
+    #[account(
+        seeds = ["sender".as_bytes(), &user_address.to_bytes(), &sender.address.to_bytes()],
+        bump = sender.bump,
+        constraint = authority.key() == sender.address
+    )]
+    pub sender: Box<Account<'info, ClientSender>>,
+    #[account(
+        seeds = ["outgoing_transfer".as_bytes(), &user_address.to_bytes(), &transfer_hash],
+        bump = transfer_account.bump,
+        constraint = transfer_account.success_execute == true
+    )]
+    pub transfer_account: Box<Account<'info, TransferAccount>>,
+    /// CHECK: This is not dangerous because we will check it inside the instruction in initializer
+    pub initializer_settings_account: Account<'info, InitializerSettings>,
+    /// CHECK: This is not dangerous because we will check it inside the instruction in initializer
+    pub relayer_settings_account: Account<'info, RelayerSettings>,
+    /// CHECK: This is not dangerous because we will check it inside the instruction in initializer
+    #[account(mut)]
+    pub system_relay_account_owner: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we will check it inside the instruction in relayer
+    pub relay_account: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we will check it inside the instruction in relayer
+    #[account(mut)]
+    pub relay_account_owner: Option<AccountInfo<'info>>,
+    /// CHECK: This is not dangerous because we will check it inside the instruction in relayer
+    pub relayer_program: Program<'info, AsterizmRelayer>,
+    pub initializer_program: Program<'info, AsterizmInitializer>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: This is not dangerous because we will check it inside the instruction in initializer
+    pub initializer_transfer_account: AccountInfo<'info>,
+    /// CHECK: account constraints checked in account trait
+    #[account(address = sysvar::instructions::id())]
+    pub instruction_sysvar_account: AccountInfo<'info>,
+}
+
+impl<'a, 'b, 'c, 'info> From<&mut ResendMessage<'info>>
+    for CpiContext<'a, 'b, 'c, 'info, asterizm_initializer::cpi::accounts::ResendMessage<'info>>
+{
+    fn from(
+        accounts: &mut ResendMessage<'info>,
+    ) -> CpiContext<'a, 'b, 'c, 'info, asterizm_initializer::cpi::accounts::ResendMessage<'info>>
+    {
+        let cpi_accounts = asterizm_initializer::cpi::accounts::ResendMessage {
+            authority: accounts.authority.to_account_info(),
+            settings_account: accounts.initializer_settings_account.to_account_info(),
+            relayer_settings_account: accounts.relayer_settings_account.to_account_info(),
+            relay_account_owner: accounts.relay_account_owner.clone(),
+            relay_account: accounts.relay_account.clone(),
+            relayer_program: accounts.relayer_program.to_account_info(),
+            system_program: accounts.system_program.to_account_info(),
+            system_relay_account_owner: accounts.system_relay_account_owner.clone(),
+            transfer_account: accounts.initializer_transfer_account.clone(),
+            instruction_sysvar_account: accounts.instruction_sysvar_account.clone(),
+        };
+        let cpi_program = accounts.initializer_program.to_account_info();
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
+
+#[derive(Accounts)]
+#[instruction(_dst_address: Pubkey, src_address: Pubkey, src_chain_id: u64, _tx_id: u128, transfer_hash: [u8; 32],)]
 pub struct InitReceiveMessage<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -240,12 +310,12 @@ pub struct InitReceiveMessage<'info> {
 pub struct PayloadReceivedEvent {
     pub src_chain_id: u64,
     pub src_address: Pubkey,
-    pub tx_id: u32,
+    pub tx_id: [u8; 16],
     pub transfer_hash: [u8; 32],
 }
 
 #[derive(Accounts)]
-#[instruction(_dst_address: Pubkey, _tx_id: u32, src_chain_id: u64, src_address: Pubkey, transfer_hash: [u8; 32],)]
+#[instruction(_dst_address: Pubkey, _tx_id: u128, src_chain_id: u64, src_address: Pubkey, transfer_hash: [u8; 32],)]
 pub struct ReceiveMessage<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -286,9 +356,16 @@ pub struct ReceiveMessage<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(dst_address: Pubkey)]
 pub struct TransferSendingResult<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
+
+    #[account(
+        seeds = ["client".as_bytes(), &dst_address.to_bytes()],
+        bump = client_account.bump,
+    )]
+    pub client_account: Box<Account<'info, ClientAccount>>,
     /// CHECK: account constraints checked in account trait
     #[account(address = sysvar::instructions::id())]
     pub instruction_sysvar_account: AccountInfo<'info>,

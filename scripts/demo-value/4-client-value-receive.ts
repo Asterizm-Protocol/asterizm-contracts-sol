@@ -66,7 +66,7 @@ const main = async () => {
     anchor.setProvider(provider);
     const program = anchor.workspace.AsterizmValueExample as Program<AsterizmValueExample>;
 
-    const txId = response.txId;
+    const txId = new BN(response.txId);
     const amount = new BN (response.amount);
     const srcChainId = new BN (response.srcChainId);
     const dstChainId = new BN (response.dstChainId);

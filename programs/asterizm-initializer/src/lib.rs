@@ -69,7 +69,7 @@ pub mod asterizm_initializer {
         dst_chain_id: u64,
         src_address: Pubkey,
         dst_address: Pubkey,
-        tx_id: u32,
+        tx_id: u128,
         transfer_hash: [u8; 32],
         transfer_result_notify_flag: bool,
         value: u64,
@@ -129,13 +129,67 @@ pub mod asterizm_initializer {
         Ok(())
     }
 
-    
+    pub fn resend_message(
+        ctx: Context<ResendMessage>,
+        relay_owner: Pubkey,
+        src_address: Pubkey,
+        transfer_hash: [u8; 32],
+        value: u64,
+    ) -> Result<()> {
+        let current_ix =
+            get_instruction_relative(0, &ctx.accounts.instruction_sysvar_account).unwrap();
+
+        // Restrict Who can call Initializer via CPI
+        if current_ix.program_id != asterizm_client::ID {
+            msg!("Only Client can call Initializer Resend message instruction");
+            return Err(ProgramError::IncorrectProgramId.into());
+        }
+
+        let mut value = value;
+        // make cpi to relayer
+        let relay_account_owner = if relay_owner == ctx.accounts.system_relay_account_owner.key() {
+            ctx.accounts.system_relay_account_owner.clone()
+        } else {
+            // transfer fee to system relay owner
+            let system_fee = ctx.accounts.relayer_settings_account.system_fee;
+            let cpi_context = CpiContext::new(
+                ctx.accounts.system_program.to_account_info(),
+                Transfer {
+                    from: ctx.accounts.authority.to_account_info(),
+                    to: ctx.accounts.system_relay_account_owner.clone(),
+                },
+            );
+            transfer(cpi_context, system_fee)?;
+            value -= system_fee;
+            if let Some(ref owner) = ctx.accounts.relay_account_owner {
+                owner.clone()
+            } else {
+                return Err(ErrorCode::AccountNotEnoughKeys.into());
+            }
+        };
+
+        asterizm_relayer::cpi::resend_message(
+            ctx.accounts.to_send_message(relay_account_owner),
+            relay_owner,
+            src_address,
+            transfer_hash,
+            value,
+        )?;
+
+        emit!(OutgoingEvent {
+            address: ctx.accounts.transfer_account.key(),
+            transfer_hash,
+        });
+
+        Ok(())
+    }
+
     pub fn init_transfer(
         ctx: Context<InitTransferMessage>,
         dst_address: Pubkey,
         src_address: Pubkey,
         src_chain_id: u64,
-        tx_id: u32,
+        tx_id: u128,
         transfer_hash: [u8; 32],
     ) -> Result<()> {
         let current_ix =

@@ -29,7 +29,7 @@ export class Nft {
     transferHash: number[],
     srcChainId: BN,
     srcAddress: PublicKey,
-    txId: number,
+    txId: BN,
     payload: Buffer,
     clientAccountPda: PublicKey,
     dstAddress: PublicKey,

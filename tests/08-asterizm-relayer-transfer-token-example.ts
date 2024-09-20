@@ -19,7 +19,7 @@ describe("Asterizm relayer transfer message for token example", () => {
   let payer: null | Keypair = null;
   const localChainId = new BN(1000);
   const chainId = new BN(1);
-  const txId = 3;
+  const txId = new BN(3);
   const amount = new BN(999);
   const name = "asterizm";
 

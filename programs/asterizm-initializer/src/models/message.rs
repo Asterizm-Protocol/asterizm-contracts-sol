@@ -22,7 +22,7 @@ pub struct OutgoingEvent {
 }
 
 #[derive(Accounts)]
-#[instruction(relay_owner: Pubkey, dst_chain_id: u64, src_address: Pubkey, dst_address: Pubkey, _tx_id: u32, transfer_hash: [u8; 32])]
+#[instruction(relay_owner: Pubkey, dst_chain_id: u64, src_address: Pubkey, dst_address: Pubkey, _tx_id: u128, transfer_hash: [u8; 32])]
 pub struct InitSendMessage<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -93,6 +93,64 @@ impl<'a, 'b, 'c, 'info> InitSendMessage<'info> {
     }
 }
 
+
+
+#[derive(Accounts)]
+#[instruction(relay_owner: Pubkey, src_address: Pubkey, transfer_hash: [u8; 32])]
+pub struct ResendMessage<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+        seeds = ["settings".as_bytes()],
+        bump = settings_account.bump
+    )]
+    pub settings_account: Account<'info, InitializerSettings>,
+    #[account(
+        seeds = ["settings".as_bytes()],
+        bump = relayer_settings_account.bump,
+        seeds::program = relayer_program.key())
+    ]
+    pub relayer_settings_account: Account<'info, RelayerSettings>,
+    /// CHECK: This is not dangerous because we will check it in constraint
+    #[account(mut,
+        constraint = relayer_settings_account.system_relayer_owner == system_relay_account_owner.key()
+    )]
+    pub system_relay_account_owner: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we will check it inside the instruction in relayer
+    pub relay_account: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we will check it inside the instruction in relayer
+    #[account(mut)]
+    pub relay_account_owner: Option<AccountInfo<'info>>,
+    pub relayer_program: Program<'info, AsterizmRelayer>,
+    pub system_program: Program<'info, System>,
+    #[account(
+    seeds = ["outgoing_transfer".as_bytes(), &src_address.to_bytes(), &transfer_hash], 
+    bump,
+    )]
+    pub transfer_account: Box<Account<'info, TransferAccount>>,
+    /// CHECK: account constraints checked in account trait
+    #[account(address = sysvar::instructions::id())]
+    pub instruction_sysvar_account: AccountInfo<'info>,
+}
+
+impl<'a, 'b, 'c, 'info> ResendMessage<'info> {
+    pub fn to_send_message(
+        &self,
+        relay_account_owner: AccountInfo<'info>,
+    ) -> CpiContext<'a, 'b, 'c, 'info, asterizm_relayer::cpi::accounts::ResendMessage<'info>> {
+        let cpi_accounts = asterizm_relayer::cpi::accounts::ResendMessage {
+            authority: self.authority.to_account_info(),
+            settings_account: self.relayer_settings_account.to_account_info(),
+            relay_account_owner,
+            relay_account: self.relay_account.clone(),
+            system_program: self.system_program.to_account_info(),
+            instruction_sysvar_account: self.instruction_sysvar_account.clone(),
+        };
+        let cpi_program = self.relayer_program.to_account_info();
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
+
 #[event]
 pub struct IncomingEvent {
     pub address: Pubkey,
@@ -100,7 +158,7 @@ pub struct IncomingEvent {
 }
 
 #[derive(Accounts)]
-#[instruction(dst_address: Pubkey, src_address: Pubkey, src_chain_id: u64, _tx_id: u32, transfer_hash: [u8; 32],)]
+#[instruction(dst_address: Pubkey, src_address: Pubkey, src_chain_id: u64, _tx_id: u128, transfer_hash: [u8; 32],)]
 pub struct InitTransferMessage<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -175,6 +233,8 @@ pub struct TransferSendingResultInitializer<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     pub client_program: Program<'info, AsterizmClient>,
+    /// CHECK: This is not dangerous because we will check it in client program
+    pub client_account: AccountInfo<'info>,
     /// CHECK: account constraints checked in account trait
     #[account(address = sysvar::instructions::id())]
     pub instruction_sysvar_account: AccountInfo<'info>,
@@ -189,6 +249,7 @@ impl<'a, 'b, 'c, 'info> From<&mut crate::TransferSendingResultInitializer<'info>
     {
         let cpi_accounts = asterizm_client::cpi::accounts::TransferSendingResult {
             authority: accounts.authority.to_account_info(),
+            client_account: accounts.client_account.clone(),
             instruction_sysvar_account: accounts.instruction_sysvar_account.clone(),
         };
         let cpi_program = accounts.client_program.to_account_info();

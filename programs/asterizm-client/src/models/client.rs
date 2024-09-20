@@ -16,7 +16,7 @@ pub const CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
 #[derive(Default)]
 pub struct ClientAccount {
     pub is_initialized: bool,
-    pub tx_id: u32,
+    pub tx_id: u128,
     pub user_address: Pubkey,
     pub relay_owner: Pubkey,
     pub notify_transfer_sending_result: bool,

@@ -35,6 +35,30 @@ pub struct SendMessage<'info> {
     pub instruction_sysvar_account: AccountInfo<'info>,
 }
 
+#[derive(Accounts)]
+#[instruction(_relay_owner: Pubkey)]
+pub struct ResendMessage<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+    seeds = ["settings".as_bytes()], bump = settings_account.bump)]
+    pub settings_account: Account<'info, RelayerSettings>,
+    #[account(
+    seeds = ["relay".as_bytes(), _relay_owner.as_ref()],
+    bump = relay_account.bump)]
+    pub relay_account: Box<Account<'info, CustomRelayer>>,
+    #[account(mut)]
+    /// CHECK: This is not dangerous because we will check it inside the instruction
+    #[account(
+        constraint = relay_account.owner == relay_account_owner.key()
+    )]
+    pub relay_account_owner: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: account constraints checked in account trait
+    #[account(address = sysvar::instructions::id())]
+    pub instruction_sysvar_account: AccountInfo<'info>,
+}
+
 #[event]
 pub struct SendRelayerFee {
     pub relay_account_owner: Pubkey,
@@ -47,13 +71,20 @@ pub struct SendMessageEvent {
     pub payload: Vec<u8>,
 }
 
+#[event]
+pub struct ResendFailedTransferEvent {
+    pub src_address: Pubkey,
+    pub transfer_hash: [u8; 32],
+    pub value: u64,
+}
+
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct TrSendMessageRequestDto {
     pub src_chain_id: u64,
     pub src_address: Pubkey,
     pub dst_chain_id: u64,
     pub dst_address: Pubkey,
-    pub tx_id: u32,
+    pub tx_id: u128,
     pub transfer_result_notify_flag: bool,
     pub transfer_hash: [u8; 32],
     pub relay_owner: Pubkey,
@@ -143,7 +174,7 @@ pub struct TrTransferMessageRequestDto {
     pub src_address: Pubkey,
     pub dst_chain_id: u64,
     pub dst_address: Pubkey,
-    pub tx_id: u32,
+    pub tx_id: u128,
     pub transfer_hash: [u8; 32],
     pub relay_owner: Pubkey,
 }
@@ -169,6 +200,8 @@ pub struct TransferSendingResultNotification<'info> {
     pub relay_account: Box<Account<'info, CustomRelayer>>,
     pub initializer_program: Program<'info, AsterizmInitializer>,
     pub client_program: Program<'info, AsterizmClient>,
+    /// CHECK: This is not dangerous because we will check it in client program
+    pub client_account: AccountInfo<'info>,
     /// CHECK: account constraints checked in account trait
     #[account(address = sysvar::instructions::id())]
     pub instruction_sysvar_account: AccountInfo<'info>,
@@ -195,6 +228,7 @@ impl<'a, 'b, 'c, 'info> From<&mut crate::TransferSendingResultNotification<'info
         let cpi_accounts = asterizm_initializer::cpi::accounts::TransferSendingResult {
             authority: accounts.authority.to_account_info(),
             client_program: accounts.client_program.to_account_info(),
+            client_account: accounts.client_account.clone(),
             instruction_sysvar_account: accounts.instruction_sysvar_account.clone(),
         };
         let cpi_program = accounts.initializer_program.to_account_info();

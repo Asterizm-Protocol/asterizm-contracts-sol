@@ -93,7 +93,7 @@ const main = async () => {
         srcChainId
     );
     const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, dstAddress);
-    const txId = response.txId;
+    const txId = new BN(response.txId);
     const relaySettings = await programRelay.account.relayerSettings.fetch(
         getSettingsPda(RELAYER_PROGRAM_ID)
     );

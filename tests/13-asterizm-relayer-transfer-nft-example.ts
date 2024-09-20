@@ -23,7 +23,7 @@ describe("Asterizm relayer transfer message for nft example", () => {
   let payer: null | Keypair = null;
   const localChainId = new BN(1000);
   const chainId = new BN(1);
-  const txId = 5;
+  const txId = new BN(5);
   const uri = "https://google.com";
 
   before(async () => {

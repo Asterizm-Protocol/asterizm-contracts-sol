@@ -1,21 +1,28 @@
 export {};
 
 import * as anchor from "@coral-xyz/anchor";
-import {ComputeBudgetProgram, PublicKey, sendAndConfirmRawTransaction, Transaction} from "@solana/web3.js";
+import {serializeNftMessagePayloadEthers} from "../../sdk/ts/nft-message-payload-serializer-ethers";
+import {ComputeBudgetProgram, Keypair, PublicKey, sendAndConfirmRawTransaction, Transaction} from "@solana/web3.js";
 import {AnchorProvider, Program} from "@coral-xyz/anchor";
+import {
+    getClientAccountPda,
+    getTrustedAccountPda,
+    getSettingsPda,
+} from "../../sdk/ts/pda";
+import BN from "bn.js";
+import {CLIENT_PROGRAM_ID, RELAYER_PROGRAM_ID} from "../../sdk/ts/program";
 import {getPayer2FromConfig, getPayerFromConfig, nftClientOwner, nftMint} from "../../tests/utils/testing";
 import prompts from "prompts";
+import {AsterizmRelayer} from "../../target/types/asterizm_relayer";
+import {serializePayloadEthers} from "../../sdk/ts/payload-serializer-ethers";
+import {sha256} from "js-sha256";
+import {RelayMessage} from "../../sdk/ts/relayer/message";
 import { Nft } from "../../sdk/ts/nft/nft";
 import {AsterizmNftExample} from "../../target/types/asterizm_nft_example";
 
 const main = async () => {
     const payer1 = await getPayerFromConfig();
     const payer2 = await getPayer2FromConfig();
-    console.log([
-        payer1.secretKey.toString(),
-        payer2.secretKey.toString()
-    ]);
-    return;
 
     const response = await prompts([
         {

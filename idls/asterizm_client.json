@@ -428,7 +428,7 @@
         },
         {
           "name": "tx_id",
-          "type": "u32"
+          "type": "u128"
         },
         {
           "name": "transfer_hash",
@@ -599,7 +599,7 @@
         },
         {
           "name": "tx_id",
-          "type": "u32"
+          "type": "u128"
         }
       ]
     },
@@ -858,7 +858,7 @@
         },
         {
           "name": "tx_id",
-          "type": "u32"
+          "type": "u128"
         },
         {
           "name": "src_chain_id",
@@ -1051,6 +1051,168 @@
       ]
     },
     {
+      "name": "resend_message",
+      "discriminator": [
+        62,
+        74,
+        77,
+        0,
+        50,
+        33,
+        223,
+        126
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "client_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sender",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  110,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              },
+              {
+                "kind": "account",
+                "path": "sender.address",
+                "account": "ClientSender"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transfer_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  117,
+                  116,
+                  103,
+                  111,
+                  105,
+                  110,
+                  103,
+                  95,
+                  116,
+                  114,
+                  97,
+                  110,
+                  115,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              },
+              {
+                "kind": "arg",
+                "path": "transfer_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "initializer_settings_account"
+        },
+        {
+          "name": "relayer_settings_account"
+        },
+        {
+          "name": "system_relay_account_owner",
+          "writable": true
+        },
+        {
+          "name": "relay_account"
+        },
+        {
+          "name": "relay_account_owner",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "relayer_program",
+          "address": "AsXCTmPnyFfxYGrymtL4wa56tk2GTBPu2q2nRAktMWyW"
+        },
+        {
+          "name": "initializer_program",
+          "address": "AsE15Mep8EJundywoGRs2XbKY28HghJ7HZ4b7qN3uiJc"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "initializer_transfer_account"
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "user_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "value",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "send_message",
       "discriminator": [
         57,
@@ -1070,7 +1232,6 @@
         },
         {
           "name": "client_account",
-          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -1250,7 +1411,7 @@
         },
         {
           "name": "tx_id",
-          "type": "u32"
+          "type": "u128"
         },
         {
           "name": "transfer_hash",
@@ -1284,6 +1445,28 @@
           "name": "authority",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "client_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "dst_address"
+              }
+            ]
+          }
         },
         {
           "name": "instruction_sysvar_account",
@@ -1745,7 +1928,7 @@
           },
           {
             "name": "tx_id",
-            "type": "u32"
+            "type": "u128"
           },
           {
             "name": "user_address",
@@ -2029,7 +2212,12 @@
           },
           {
             "name": "id",
-            "type": "u32"
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
           },
           {
             "name": "transfer_hash",
@@ -2062,7 +2250,12 @@
           },
           {
             "name": "tx_id",
-            "type": "u32"
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
           },
           {
             "name": "transfer_hash",

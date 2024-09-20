@@ -165,7 +165,7 @@ pub mod asterizm_client {
         user_address: Pubkey,
         dst_chain_id: u64,
         payload: Vec<u8>,
-        tx_id: u32,
+        tx_id: u128,
     ) -> Result<()> {
         ctx.accounts.client_account.tx_id += 1;
 
@@ -239,7 +239,7 @@ pub mod asterizm_client {
         emit!(InitiateTransferEvent {
             dst_chain_id,
             trusted_address: ctx.accounts.trusted_address.address,
-            id: tx_id,
+            id: tx_id.to_be_bytes(),
             transfer_hash,
             payload,
         });
@@ -251,7 +251,7 @@ pub mod asterizm_client {
         ctx: Context<SendMessage>,
         user_address: Pubkey,
         dst_chain_id: u64,
-        tx_id: u32,
+        tx_id: u128,
         transfer_hash: [u8; 32],
         value: u64,
     ) -> Result<()> {
@@ -271,13 +271,30 @@ pub mod asterizm_client {
 
         Ok(())
     }
+    
+    pub fn resend_message(
+        ctx: Context<ResendMessage>,
+        user_address: Pubkey,
+        transfer_hash: [u8; 32],
+        value: u64,
+    ) -> Result<()> {
+        asterizm_initializer::cpi::resend_message(
+            ctx.accounts.into(),
+            ctx.accounts.client_account.relay_owner,
+            user_address,
+            transfer_hash,
+            value,
+        )?;
+
+        Ok(())
+    }
 
     pub fn init_receive_message(
         ctx: Context<InitReceiveMessage>,
         _dst_address: Pubkey,
         src_address: Pubkey,
         src_chain_id: u64,
-        tx_id: u32,
+        tx_id: u128,
         transfer_hash: [u8; 32],
     ) -> Result<()> {
         let current_ix =
@@ -295,7 +312,7 @@ pub mod asterizm_client {
         emit!(PayloadReceivedEvent {
             src_chain_id,
             src_address,
-            tx_id,
+            tx_id: tx_id.to_be_bytes(),
             transfer_hash
         });
 
@@ -305,7 +322,7 @@ pub mod asterizm_client {
     pub fn receive_message(
         ctx: Context<ReceiveMessage>,
         dst_address: Pubkey,
-        tx_id: u32,
+        tx_id: u128,
         src_chain_id: u64,
         src_address: Pubkey,
         transfer_hash: [u8; 32],

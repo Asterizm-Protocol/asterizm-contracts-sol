@@ -231,7 +231,24 @@ const main = async () => {
     }
 
 
+    const clientInstructionResend = await (new ClientMessage(programClient.methods)).resendInstruction(
+        payer!,
+        srcAddress,
+        payer!.publicKey,
+        payer!.publicKey,
+        sendTransferHash,
+        new BN (response.feeValue)
+    );
 
+    tx = new Transaction();
+    tx.add(clientInstructionResend);
+    tx.feePayer = payer.publicKey;
+    latestBlockhash = await provider.connection.getLatestBlockhash();
+    tx.recentBlockhash = latestBlockhash.blockhash;
+    tx.sign(payer);
+    await sendAndConfirmRawTransaction(provider.connection, tx.serialize(), {
+        commitment: "confirmed",
+    });
 
     const relayInstructions = await (new RelayMessage(programRelay.methods)).transferInstruction(
         payer!,

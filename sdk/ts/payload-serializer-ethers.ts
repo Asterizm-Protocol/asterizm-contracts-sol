@@ -8,21 +8,21 @@ export type PayloadModelEthers = {
   srcAddress: PublicKey;
   dstChainId: BN;
   dstAddress: PublicKey;
-  txId: number;
+  txId: BN;
   payload: Uint8Array;
 };
 
 export const serializePayloadEthers = (payload: PayloadModelEthers) => {
   const abiCoder = ethers.AbiCoder.defaultAbiCoder();
   let serialized = abiCoder.encode(
-      ["tuple(uint64, uint256, uint64, uint256, uint32, bytes)"],
+      ["tuple(uint64, uint256, uint64, uint256, uint256, bytes)"],
       [
         [
           payload.srcChainId.toNumber(),
           decodeBase58(payload.srcAddress.toBase58()),
           payload.dstChainId.toNumber(),
           decodeBase58(payload.dstAddress.toBase58()),
-          payload.txId,
+          payload.txId.toNumber(),
           payload.payload,
         ],
       ]

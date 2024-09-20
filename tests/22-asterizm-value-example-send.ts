@@ -19,7 +19,7 @@ describe("Asterizm value example init send message tests", () => {
     .AsterizmValueExample as Program<AsterizmValueExample>;
   const chainId = new BN(1);
   const amount = new BN(999);
-  const txId = 0;
+  const txId = new BN(0);
   const localChainId = new BN(1000);
 
   before(async () => {

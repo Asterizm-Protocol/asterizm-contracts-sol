@@ -13,7 +13,7 @@ export class InitializerMessage {
     dstChainId: BN,
     srcAddress: PublicKey,
     dstAddress: PublicKey,
-    txId: number,
+    txId: BN,
     transferResultNotifyFlag: boolean,
     transferHash: number[],
     value: BN

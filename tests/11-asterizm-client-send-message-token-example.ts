@@ -48,7 +48,7 @@ describe("Asterizm client send message for token example tests", () => {
         name
     );
 
-    const txId = 0;
+    const txId = new BN(0);
 
     const trustedAddressPda = getTrustedAccountPda(
       CLIENT_PROGRAM_ID,

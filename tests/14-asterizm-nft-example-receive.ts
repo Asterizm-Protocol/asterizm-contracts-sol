@@ -39,7 +39,7 @@ describe("Asterizm nft example receive message tests", () => {
   const name = "asterizm_nft";
   const symbol = "AAA";
   const uri = "https://google.com";
-  const txId = 5;
+  const txId = new BN(5);
 
   before(async () => {
     await fundWalletWithSOL(provider.wallet.publicKey);

@@ -26,7 +26,7 @@ describe("Asterizm client send message tests", () => {
   const trustedUserAddress = anchor.web3.Keypair.generate();
   const senderAddress = anchor.web3.Keypair.generate();
   const chainId = new BN(1);
-  const txId = 1;
+  const txId = new BN(1);
   let srcAddress: null | PublicKey = null;
 
   before(async () => {

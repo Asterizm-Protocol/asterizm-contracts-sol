@@ -90,7 +90,7 @@ describe("Asterizm initializer initialize tests", () => {
     const message = new InitializerMessage(program.methods);
     const srcAddress = anchor.web3.Keypair.generate().publicKey;
     const dstAddress = anchor.web3.Keypair.generate().publicKey;
-    const txId = 0;
+    const txId = new BN(0);
     const transferResultNotifyFlag = true;
     const transferHash = [
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

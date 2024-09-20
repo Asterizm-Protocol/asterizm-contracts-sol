@@ -10,7 +10,6 @@ declare_program!(asterizm_client);
 use crate::asterizm_client::accounts::{ClientAccount, ClientTrustedAddress};
 use crate::asterizm_client::program::AsterizmClient;
 
-
 #[program]
 mod asterizm_token_example {
     use super::*;
@@ -59,7 +58,7 @@ mod asterizm_token_example {
         transfer_hash: [u8; 32],
         src_chain_id: u64,
         src_address: Pubkey,
-        tx_id: u32,
+        tx_id: u128,
         payload: Vec<u8>,
     ) -> Result<()> {
         let data = deserialize_message_payload_eth(&payload)?;
@@ -255,14 +254,14 @@ pub struct SendMessage<'info> {
 pub struct MessagePayload {
     pub dst_address: Pubkey,
     pub amount: u64,
-    pub tx_id: u32,
+    pub tx_id: u128,
 }
 
 pub fn serialize_message_payload_eth(message: MessagePayload) -> Vec<u8> {
     let mut word = [0u8; 96];
     word[..32].copy_from_slice(&message.dst_address.to_bytes());
     word[(64 - 8)..64].copy_from_slice(&message.amount.to_be_bytes());
-    word[(96 - 4)..96].copy_from_slice(&message.tx_id.to_be_bytes());
+    word[(96 - 16)..96].copy_from_slice(&message.tx_id.to_be_bytes());
     word.to_vec()
 }
 
@@ -272,9 +271,9 @@ pub fn deserialize_message_payload_eth(payload: &[u8]) -> Result<MessagePayload>
     arr.copy_from_slice(&payload[(64 - 8)..64]);
     let amount = u64::from_be_bytes(arr);
 
-    let mut arr = [0u8; 4];
-    arr.copy_from_slice(&payload[(96 - 4)..96]);
-    let tx_id = u32::from_be_bytes(arr);
+    let mut arr = [0u8; 16];
+    arr.copy_from_slice(&payload[(96 - 16)..96]);
+    let tx_id = u128::from_be_bytes(arr);
 
     Ok(MessagePayload {
         dst_address,
@@ -334,7 +333,7 @@ pub const TOKEN_CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
 pub struct TokenClientAccount {
     pub is_initialized: bool,
     pub authority: Pubkey,
-    pub tx_id: u32,
+    pub tx_id: u128,
     pub bump: u8,
 }
 
@@ -454,7 +453,6 @@ impl<'a, 'b, 'c, 'info> ReceiveMessage<'info> {
         CpiContext::new(cpi_program, cpi_accounts)
     }
 }
-
 
 #[derive(Accounts)]
 #[instruction(_name: String)]

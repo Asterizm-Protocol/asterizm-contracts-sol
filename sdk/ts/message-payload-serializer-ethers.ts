@@ -5,7 +5,7 @@ import { decodeBase58, ethers } from "ethers";
 export type MessagePayloadModelEthers = {
   to: PublicKey;
   amount: BN;
-  txId: number;
+  txId: BN;
 };
 
 export const serializeMessagePayloadEthers = (
@@ -13,12 +13,12 @@ export const serializeMessagePayloadEthers = (
 ) => {
   const abiCoder = ethers.AbiCoder.defaultAbiCoder();
   let serialized = abiCoder.encode(
-    ["tuple(uint256,uint64, uint32)"],
+    ["tuple(uint256,uint64, uint256)"],
     [
       [
         decodeBase58(payload.to.toBase58()),
         payload.amount.toNumber(),
-        payload.txId,
+        payload.txId.toNumber(),
       ],
     ]
   );

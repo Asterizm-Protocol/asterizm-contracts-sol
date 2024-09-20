@@ -23,7 +23,7 @@ export class ClientMessage {
     authority: Keypair,
     dstChainId: BN,
     payload: Buffer,
-    txId: number,
+    txId: BN,
     transferHash: number[],
   ) {
     const transferAccountPda = getOutgoingTransferAccountPda(
@@ -50,7 +50,7 @@ export class ClientMessage {
     systemRelayOwner: PublicKey,
     localChainId: BN,
     dstChainId: BN,
-    txId: number,
+    txId: BN,
     transferHash: number[],
     value: BN
   ) {
@@ -115,7 +115,7 @@ export class ClientMessage {
     systemRelayOwner: PublicKey,
     localChainId: BN,
     dstChainId: BN,
-    txId: number,
+    txId: BN,
     transferHash: number[],
     value: BN
   ): Promise<TransactionInstruction> {
@@ -171,6 +171,53 @@ export class ClientMessage {
       .signers([authority])
       .instruction();
   }
+  
+  async resendInstruction(
+    authority: Keypair,
+    srcAddress: PublicKey,
+    relayOwner: PublicKey,
+    systemRelayOwner: PublicKey,
+    transferHash: number[],
+    value: BN
+  ): Promise<TransactionInstruction> {
+
+    const initializerTransferAccount = getOutgoingTransferAccountPda(
+      INITIALIZER_PROGRAM_ID,
+      srcAddress,
+      transferHash
+    );
+
+    const transferAccount = getOutgoingTransferAccountPda(
+      CLIENT_PROGRAM_ID,
+      srcAddress,
+      transferHash
+    );
+
+    const relayPda = getRelayPda(RELAYER_PROGRAM_ID, relayOwner);
+    const relayerSettingsPda = getSettingsPda(RELAYER_PROGRAM_ID);
+    const initializerSettingsPda = getSettingsPda(INITIALIZER_PROGRAM_ID);
+    const sender = getSenderAccountPda(
+      CLIENT_PROGRAM_ID,
+      srcAddress,
+      authority.publicKey
+    );
+
+    return this.programAPI
+      .resendMessage(srcAddress,transferHash, value)
+      .accountsPartial({
+        authority: authority.publicKey,
+        relayAccountOwner: relayOwner,
+        systemRelayAccountOwner: systemRelayOwner,
+        relayerSettingsAccount: relayerSettingsPda,
+        initializerSettingsAccount: initializerSettingsPda,
+        relayAccount: relayPda,
+        initializerTransferAccount,
+        transferAccount,
+        sender,
+      })
+      .signers([authority])
+      .instruction();
+  }
 
   async receive(
     authority: Keypair,
@@ -179,7 +226,7 @@ export class ClientMessage {
     srcAddress: PublicKey,
     payload: Buffer,
     transferHash: number[],
-    txId: number
+    txId: BN
   ) {
     const transferAccountPda = getIncomingTransferAccountPda(
       CLIENT_PROGRAM_ID,

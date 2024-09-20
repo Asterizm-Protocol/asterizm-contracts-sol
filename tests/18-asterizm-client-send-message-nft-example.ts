@@ -61,7 +61,7 @@ describe("Asterizm client send message for nft example tests", () => {
       clientAccountPda
     );
 
-    const txId = clientAccount.txId - 1;
+    const txId = clientAccount.txId.sub(new BN(1));
 
     const trustedAddressPda = getTrustedAccountPda(
       CLIENT_PROGRAM_ID,

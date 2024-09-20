@@ -129,7 +129,7 @@ const main = async () => {
     const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, dstAddress);
 
     let txId = response.txId;
-    if (response.txId == 0) {
+    if (response.txId.eq(new BN(0))) {
         const clientAccount = await programInternalClient.account.clientAccount.fetch(
             getClientAccountPda(CLIENT_PROGRAM_ID, srcAddress)
         );

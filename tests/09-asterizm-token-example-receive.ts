@@ -30,7 +30,7 @@ describe("Asterizm token example receive message tests", () => {
   const chainId = new BN(1);
   const localChainId = new BN(1000);
   const name = "asterizm";
-  const txId = 3;
+  const txId = new BN(3);
   const amount = new BN(999);
 
   before(async () => {

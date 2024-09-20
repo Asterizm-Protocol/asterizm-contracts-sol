@@ -31,7 +31,7 @@ describe("Asterizm relayer transfer message", () => {
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0,
     ]);
-    const txId = 2;
+    const txId = new BN(2);
 
     const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, dstAddress);
 

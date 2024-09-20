@@ -36,7 +36,7 @@ describe("Asterizm client receive message tests", () => {
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0,
     ]);
-    const txId = 2;
+    const txId = new BN(2);
 
     const trustedAddressPda = getTrustedAccountPda(
       CLIENT_PROGRAM_ID,

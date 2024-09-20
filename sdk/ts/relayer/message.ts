@@ -16,7 +16,7 @@ export class RelayMessage {
     dstChainId: BN,
     srcAddress: PublicKey,
     dstAddress: PublicKey,
-    txId: number,
+    txId: BN,
     transferResultNotifyFlag: boolean,
     transferHash: number[],
     value: BN
@@ -47,7 +47,7 @@ export class RelayMessage {
     srcAddress: PublicKey,
     localChainId: BN,
     dstAddress: PublicKey,
-    txId: number,
+    txId: BN,
     transferHash: number[],
     clientAccountPda: PublicKey,
     trustedAddressPda: PublicKey
@@ -106,7 +106,7 @@ export class RelayMessage {
     srcAddress: PublicKey,
     localChainId: BN,
     dstAddress: PublicKey,
-    txId: number,
+    txId: BN,
     transferHash: number[],
     clientAccountPda: PublicKey,
     trustedAddressPda: PublicKey

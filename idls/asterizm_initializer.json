@@ -266,7 +266,7 @@
         },
         {
           "name": "tx_id",
-          "type": "u32"
+          "type": "u128"
         },
         {
           "name": "transfer_hash",
@@ -335,6 +335,154 @@
         {
           "name": "manager",
           "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "resend_message",
+      "discriminator": [
+        62,
+        74,
+        77,
+        0,
+        50,
+        33,
+        223,
+        126
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "relayer_settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "relayer_program"
+            }
+          }
+        },
+        {
+          "name": "system_relay_account_owner",
+          "writable": true
+        },
+        {
+          "name": "relay_account"
+        },
+        {
+          "name": "relay_account_owner",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "relayer_program",
+          "address": "AsXCTmPnyFfxYGrymtL4wa56tk2GTBPu2q2nRAktMWyW"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "transfer_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  117,
+                  116,
+                  103,
+                  111,
+                  105,
+                  110,
+                  103,
+                  95,
+                  116,
+                  114,
+                  97,
+                  110,
+                  115,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "src_address"
+              },
+              {
+                "kind": "arg",
+                "path": "transfer_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "relay_owner",
+          "type": "pubkey"
+        },
+        {
+          "name": "src_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "value",
+          "type": "u64"
         }
       ]
     },
@@ -540,7 +688,7 @@
         },
         {
           "name": "tx_id",
-          "type": "u32"
+          "type": "u128"
         },
         {
           "name": "transfer_hash",
@@ -582,6 +730,9 @@
         {
           "name": "client_program",
           "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+        },
+        {
+          "name": "client_account"
         },
         {
           "name": "instruction_sysvar_account",

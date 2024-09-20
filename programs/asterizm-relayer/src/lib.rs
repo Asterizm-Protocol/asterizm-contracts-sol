@@ -11,7 +11,6 @@ mod models;
 
 pub use models::*;
 
-
 #[program]
 pub mod asterizm_relayer {
     use super::*;
@@ -154,7 +153,7 @@ pub mod asterizm_relayer {
         dst_chain_id: u64,
         src_address: Pubkey,
         dst_address: Pubkey,
-        tx_id: u32,
+        tx_id: u128,
         transfer_result_notify_flag: bool,
         transfer_hash: [u8; 32],
         value: u64,
@@ -210,13 +209,56 @@ pub mod asterizm_relayer {
         Ok(())
     }
 
+    pub fn resend_message(
+        ctx: Context<ResendMessage>,
+        _relay_owner: Pubkey,
+        src_address: Pubkey,
+        transfer_hash: [u8; 32],
+        value: u64,
+    ) -> Result<()> {
+        let current_ix =
+            get_instruction_relative(0, &ctx.accounts.instruction_sysvar_account).unwrap();
+
+        // Restrict Who can call Relayer via CPI
+        if current_ix.program_id != asterizm_client::ID
+            && current_ix.program_id != asterizm_initializer::ID
+        {
+            msg!("Only Client or Initializer can call Relayer Send message instruction");
+            return Err(ProgramError::IncorrectProgramId.into());
+        }
+
+        if value < ctx.accounts.relay_account.fee {
+            msg!("Not enough amount to pay for relayer fee");
+            return Err(ProgramError::InsufficientFunds.into());
+        }
+
+        // transfer fee to relay
+        let cpi_context = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.authority.to_account_info(),
+                to: ctx.accounts.relay_account_owner.clone(),
+            },
+        );
+        transfer(cpi_context, value)?;
+
+        emit!(SendRelayerFee {
+            fee: ctx.accounts.relay_account.fee,
+            relay_account_owner: ctx.accounts.relay_account_owner.key()
+        });
+
+        emit!(ResendFailedTransferEvent { value, transfer_hash, src_address });
+
+        Ok(())
+    }
+
     pub fn transfer_message(
         ctx: Context<TransferMessage>,
         relay_owner: Pubkey,
         src_chain_id: u64,
         src_address: Pubkey,
         dst_address: Pubkey,
-        tx_id: u32,
+        tx_id: u128,
         transfer_hash: [u8; 32],
     ) -> Result<()> {
         let local_chain_id = ctx.accounts.settings_account.local_chain_id;

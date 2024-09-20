@@ -84,7 +84,7 @@ const main = async () => {
     const chainId = new BN(response.dstChainId);
     const amount = new BN(response.amount);
     const value = new BN(response.value);
-    const txId = response.txId;
+    const txId = new BN(response.txId);
     const relaySettings = await programRelay.account.relayerSettings.fetch(
         getSettingsPda(RELAYER_PROGRAM_ID)
     );

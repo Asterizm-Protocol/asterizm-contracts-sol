@@ -25,7 +25,7 @@ pub mod asterizm_nft_example {
         transfer_hash: [u8; 32],
         src_account: Pubkey,
         src_chain_id: u64,
-        tx_id: u32,
+        tx_id: u128,
         payload: Vec<u8>,
         uri: String,
         name: String,
@@ -267,7 +267,6 @@ pub mod asterizm_nft_example {
         notify_transfer_sending_result: bool,
         disable_hash_validation: bool,
     ) -> Result<()> {
-
         let seeds: &[&[_]] = &[
             &ctx.accounts.nft_client_account.authority.to_bytes(),
             b"asterizm-nft-client",
@@ -488,7 +487,6 @@ pub struct MintNft<'info> {
     #[account(address = sysvar::instructions::id())]
     pub instruction_sysvar_account: AccountInfo<'info>,
 }
-
 
 #[derive(Accounts)]
 #[instruction(_transfer_hash: [u8; 32])]
@@ -729,7 +727,7 @@ pub const NFT_CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
 pub struct NftClientAccount {
     pub is_initialized: bool,
     pub authority: Pubkey,
-    pub tx_id: u32,
+    pub tx_id: u128,
     pub bump: u8,
 }
 
@@ -772,7 +770,6 @@ impl<'a, 'b, 'c, 'info> CreateNftClient<'info> {
         CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
     }
 }
-
 
 #[derive(Accounts)]
 pub struct UpdateNftClient<'info> {

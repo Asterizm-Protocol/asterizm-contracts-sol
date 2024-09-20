@@ -1091,7 +1091,7 @@
         },
         {
           "name": "tx_id",
-          "type": "u32"
+          "type": "u128"
         },
         {
           "name": "payload",
@@ -1463,7 +1463,7 @@
           },
           {
             "name": "tx_id",
-            "type": "u32"
+            "type": "u128"
           },
           {
             "name": "user_address",
@@ -1503,7 +1503,7 @@
           },
           {
             "name": "tx_id",
-            "type": "u32"
+            "type": "u128"
           },
           {
             "name": "bump",
