@@ -718,7 +718,7 @@ pub fn deserialize_message_payload_eth(payload: &[u8]) -> Result<MessagePayload>
 
 pub const NFT_CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
     + PUBKEY_BYTES                            // authority
-    + 32                                      // tx_id
+    + 128                                     // tx_id
     + 1                                       // bump
 ;
 

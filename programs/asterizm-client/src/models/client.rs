@@ -4,7 +4,7 @@ use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 use crate::ClientProgramSettings;
 
 pub const CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
-+ 32                                      // tx_id
++ 128                                     // tx_id
 + PUBKEY_BYTES                            // user_address
 + PUBKEY_BYTES                            // relay
 + 1                                       // notify_transfer_sending_result

@@ -203,7 +203,7 @@ impl<'a, 'b, 'c, 'info> From<&mut ReceiveMessage<'info>>
 }
 
 pub const VALUE_CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
-    + 32                                      // tx_id
+    + 128                                     // tx_id
     + 1                                       // bump
 ;
 
