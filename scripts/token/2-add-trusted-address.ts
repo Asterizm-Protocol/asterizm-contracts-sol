@@ -6,8 +6,8 @@ import * as anchor from "@coral-xyz/anchor";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { getPayerFromConfig } from "../../tests/utils/testing";
 import prompts from "prompts";
-import { AsterizmClient } from "../../target/types/asterizm_client";
-import {TrustedAddress} from "../../sdk/ts/client/trusted_address";
+import { AsterizmTokenExample } from "../../target/types/asterizm_token_example";
+import {TrustedAddress} from "../../sdk/ts/token/trusted_address";
 import { BN } from "bn.js";
 
 const main = async () => {
@@ -22,9 +22,15 @@ const main = async () => {
         },
         {
             type: "text",
-            name: "address",
+            name: "trustedAddress",
             message: "Trusted address",
             initial: 0,
+        },
+        {
+            type: "text",
+            name: "tokenName",
+            message: "Token name",
+            initial: 'AsterizmToken1',
         },
         {
             type: "number",
@@ -46,21 +52,21 @@ const main = async () => {
     anchor.setProvider(provider);
 
     const program = anchor.workspace
-        .AsterizmClient as Program<AsterizmClient>;
+        .AsterizmTokenExample as Program<AsterizmTokenExample>;
 
     const client = new TrustedAddress(program.methods);
     if (response.needToRemove == 1) {
         await client.remove(
             payer!,
-            payer!.publicKey,
+            response.tokenName,
             new BN(response.chainId)
         );
     }
 
     await client.create(
         payer!,
-        payer!.publicKey,
-        new PublicKey(response.address),
+        response.tokenName,
+        new PublicKey(response.trustedAddress),
         new BN(response.chainId)
     );
 };

@@ -88,12 +88,15 @@ const main = async () => {
         payer!.publicKey,
         name
     );
-    await getOrCreateAssociatedTokenAccount(
+    const tokenAccount = await getOrCreateAssociatedTokenAccount(
         connection,
         payer!,
         mintPda,
         payer!.publicKey
     ).then((ac) => ac.address);
+
+    console.log("Token account address: " + tokenAccount);
+    return;
 
 
 

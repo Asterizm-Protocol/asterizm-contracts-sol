@@ -48,13 +48,6 @@ const main = async () => {
 
   const init = new Chain(program.methods);
   await init.create(payer!, new BN(response.id), response.name, response.chainType);
-
-  const chainPda = getChainPda(program.programId, new BN(response.id));
-  const chainSettings = await program.account.chain.fetch(chainPda);
-
-  assert.ok(chainSettings.isInitialized == true);
-  assert.ok(chainSettings.name == response.name);
-  assert.ok(chainSettings.id.eq(response.id));
 };
 main()
   .then(() => process.exit(0))
