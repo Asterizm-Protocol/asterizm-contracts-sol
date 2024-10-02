@@ -88,6 +88,18 @@ mod asterizm_token_example {
         mint_to(ctx.accounts.to_mint_cpi(signer), data.amount)
     }
 
+    pub fn mint_to_user(ctx: Context<MintToUser>, name: String, amount: u64) -> Result<()> {
+        let seeds: &[&[_]] = &[
+            &ctx.accounts.token_client_account.authority.to_bytes(),
+            name.as_bytes(),
+            b"asterizm-token-client",
+            &[ctx.accounts.token_client_account.bump],
+        ];
+        let signer: &[&[&[u8]]] = &[&seeds[..]];
+
+        mint_to(ctx.accounts.to_mint_cpi(signer), amount)
+    }
+
     pub fn create_mint(
         ctx: Context<CreateMint>,
         _name: String,
@@ -322,6 +334,26 @@ pub struct ReceiveMessage<'info> {
     pub relayer_program: AccountInfo<'info>,
 }
 
+#[derive(Accounts)]
+#[instruction(name: String)]
+pub struct MintToUser<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+        seeds = [&authority.key().as_ref(), name.as_bytes(), b"asterizm-token-client"],
+        bump = token_client_account.bump,
+    )]
+    pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+    #[account(mut)]
+    pub mint: Account<'info, Mint>,
+    #[account(
+        mut,
+        token::mint = mint,
+    )]
+    pub token_account: Account<'info, TokenAccount>,
+    pub token_program: Program<'info, Token>,
+}
+
 pub const TOKEN_CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
     + PUBKEY_BYTES                            // authority
     + 128                                      // tx_id
@@ -451,6 +483,21 @@ impl<'a, 'b, 'c, 'info> ReceiveMessage<'info> {
         };
         let cpi_program = self.client_program.to_account_info();
         CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
+
+impl<'a, 'b, 'c, 'info> MintToUser<'info> {
+    fn to_mint_cpi(
+        &self,
+        seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, MintTo<'info>> {
+        let cpi_accounts = MintTo {
+            authority: self.token_client_account.to_account_info(),
+            to: self.token_account.to_account_info(),
+            mint: self.mint.to_account_info(),
+        };
+        let cpi_program = self.token_program.to_account_info();
+        CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
     }
 }
 

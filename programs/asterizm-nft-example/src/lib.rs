@@ -683,31 +683,22 @@ pub struct MessagePayload {
 pub fn serialize_message_payload_eth(message: MessagePayload) -> Vec<u8> {
     let mut result = vec![];
 
-    let mut word = [0u8; 160];
-    word[(32 - 4)..32].copy_from_slice(&32u32.to_be_bytes());
-    word[32..64].copy_from_slice(&message.dst_address.to_bytes());
-    word[64..96].copy_from_slice(&message.id);
-    word[(128 - 4)..128].copy_from_slice(&96u32.to_be_bytes());
-    word[(160 - 4)..160].copy_from_slice(&(message.uri.len() as u32).to_be_bytes());
+    let mut word = [0u8; 64];
+    word[0..32].copy_from_slice(&message.dst_address.to_bytes());
+    word[32..64].copy_from_slice(&message.id);
     result.extend_from_slice(&word);
     result.extend_from_slice(&message.uri.as_bytes());
-    let extension = 32 - result.len() % 32;
-    result.extend_from_slice(&vec![0; extension]);
 
     result
 }
 
 pub fn deserialize_message_payload_eth(payload: &[u8]) -> Result<MessagePayload> {
-    let dst_address = Pubkey::try_from_slice(&payload[32..64])?;
+    let dst_address = Pubkey::try_from_slice(&payload[0..32])?;
     let mut id = [0u8; 32];
-    id.copy_from_slice(&payload[64..96]);
+    id.copy_from_slice(&payload[32..64]);
 
-    let mut arr = [0u8; 4];
-    arr.copy_from_slice(&payload[(160 - 4)..160]);
-    let uri_len = u32::from_be_bytes(arr);
-
-    let uri = String::from_utf8(payload[160..(160 + uri_len as usize)].to_vec())
-        .map_err(|_| ProgramError::InvalidArgument)?;
+    let uri =
+        String::from_utf8(payload[64..].to_vec()).map_err(|_| ProgramError::InvalidArgument)?;
 
     Ok(MessagePayload {
         id,

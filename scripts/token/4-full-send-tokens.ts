@@ -70,7 +70,7 @@ const main = async () => {
             type: "text",
             name: "dstAddress",
             message: "dstAddress (address on other blockchain side, needed to be in trusted addresses)",
-            // initial: "111111111111dtZTNgYNJ7o2J9oVGYx3n41YEHH",
+            // initial: "1111111111114MaFcXR65rueYpZ3fvikn5V2JEi7",
             initial: "DLwV9Chv99EkjL9jHg5WF8ZZmCW1ct9tuujEsnpGDx7r",
         },
         {

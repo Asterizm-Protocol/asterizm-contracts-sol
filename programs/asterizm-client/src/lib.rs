@@ -239,7 +239,7 @@ pub mod asterizm_client {
         emit!(InitiateTransferEvent {
             dst_chain_id,
             trusted_address: ctx.accounts.trusted_address.address,
-            id: tx_id.to_be_bytes(),
+            id: tx_id,
             transfer_hash,
             payload,
         });
@@ -271,7 +271,7 @@ pub mod asterizm_client {
 
         Ok(())
     }
-    
+
     pub fn resend_message(
         ctx: Context<ResendMessage>,
         user_address: Pubkey,
@@ -312,7 +312,7 @@ pub mod asterizm_client {
         emit!(PayloadReceivedEvent {
             src_chain_id,
             src_address,
-            tx_id: tx_id.to_be_bytes(),
+            tx_id,
             transfer_hash
         });
 

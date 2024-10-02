@@ -1,4 +1,3 @@
-
 export {};
 
 import * as anchor from "@coral-xyz/anchor";
@@ -7,20 +6,35 @@ import {AnchorProvider, Program} from "@coral-xyz/anchor";
 
 import prompts from "prompts";
 import {getPayerFromConfig, } from "../tests/utils/testing";
-import { getSettingsPda, } from "../sdk/ts/pda";
+import { getSettingsPda, getTrustedAccountPda, } from "../sdk/ts/pda";
 import {CLIENT_PROGRAM_ID} from "../sdk/ts/program";
 import {AsterizmClient} from "../target/types/asterizm_client";
+import { PublicKey } from "@solana/web3.js";
+import { BN } from "bn.js";
 
 const main = async () => {
     const payer = await getPayerFromConfig();
 
     const response = await prompts([
         {
+            type: "number",
+            name: "chainId",
+            message: "chain id",
+            initial: 11155111,
+        },
+        {
+            type: "text",
+            name: "user",
+            message: "(user address)",
+            initial: "FsNa7kiksBmmJtyGjo8MyoQx3rHaSAsq8dFviD8L4Xgr",
+        },
+        {
             type: "text",
             name: "endpoint",
             message: "Solana Endpoint",
             initial: "https://api.devnet.solana.com/",
         },
+
     ]);
 
     const connection = new anchor.web3.Connection(response.endpoint);
@@ -35,6 +49,18 @@ const main = async () => {
         clientSettingsAccount!
     );
     console.log(settings)
+
+    const trustedAddress = getTrustedAccountPda(
+        CLIENT_PROGRAM_ID,
+        new PublicKey(response.user),
+        new BN(response.chainId)
+    );
+
+    console.log(trustedAddress)
+    const trust = await program.account.clientTrustedAddress.fetch(
+        trustedAddress!
+    );
+    console.log(trust)
 
 };
 main()

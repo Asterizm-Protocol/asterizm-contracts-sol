@@ -14,20 +14,17 @@ export type PayloadModelEthers = {
 };
 
 export const serializePayloadEthers = (payload: PayloadModelEthers) => {
-  const abiCoder = ethers.AbiCoder.defaultAbiCoder();
-  let serialized = abiCoder.encode(
-      ["tuple(uint64, uint256, uint64, uint256, uint256, bytes)"],
+  let serialized = ethers.solidityPacked(["uint64", "uint256", "uint64", "uint256", "uint256", "bytes"],
       [
-        [
-          payload.srcChainId.toNumber(),
-          decodeBase58(payload.srcAddress.toBase58()),
-          payload.dstChainId.toNumber(),
-          decodeBase58(payload.dstAddress.toBase58()),
-          payload.txId.toNumber(),
-          payload.payload,
-        ],
-      ]
-  );
+        payload.srcChainId.toNumber(),
+        decodeBase58(payload.srcAddress.toBase58()),
+        payload.dstChainId.toNumber(),
+        decodeBase58(payload.dstAddress.toBase58()),
+        payload.txId.toNumber(),
+        payload.payload,
+      ],
+  )
+
   return Uint8Array.from(Buffer.from(serialized.substring(2), 'hex'));
 };
 

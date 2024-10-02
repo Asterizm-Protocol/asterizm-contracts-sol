@@ -27,7 +27,7 @@ pub struct TransferAccount {
 pub struct InitiateTransferEvent {
     pub dst_chain_id: u64,
     pub trusted_address: Pubkey,
-    pub id: [u8; 16],
+    pub id: u128,
     pub transfer_hash: [u8; 32],
     pub payload: Vec<u8>,
 }
@@ -82,15 +82,12 @@ pub struct InitMessage {
 pub fn serialize_init_message_eth(message: InitMessage) -> Vec<u8> {
     let mut result = vec![];
 
-    let mut word = [0u8; 256];
-    word[(32 - 4)..32].copy_from_slice(&32u32.to_be_bytes());
-    word[(64 - 8)..64].copy_from_slice(&message.src_chain_id.to_be_bytes());
-    word[64..96].copy_from_slice(&message.src_address.to_bytes());
-    word[(128 - 8)..128].copy_from_slice(&message.dst_chain_id.to_be_bytes());
-    word[128..160].copy_from_slice(&message.dst_address.to_bytes());
-    word[(192 - 16)..192].copy_from_slice(&message.tx_id.to_be_bytes());
-    word[(224 - 4)..224].copy_from_slice(&192u32.to_be_bytes());
-    word[(256 - 4)..256].copy_from_slice(&(message.payload.len() as u32).to_be_bytes());
+    let mut word = [0u8; 112];
+    word[0..8].copy_from_slice(&message.src_chain_id.to_be_bytes());
+    word[8..40].copy_from_slice(&message.src_address.to_bytes());
+    word[40..48].copy_from_slice(&message.dst_chain_id.to_be_bytes());
+    word[48..80].copy_from_slice(&message.dst_address.to_bytes());
+    word[(112 - 16)..112].copy_from_slice(&message.tx_id.to_be_bytes());
 
     result.extend_from_slice(&word);
     result.extend_from_slice(&message.payload);
@@ -99,26 +96,26 @@ pub fn serialize_init_message_eth(message: InitMessage) -> Vec<u8> {
 
 pub fn build_crosschain_hash(_packed: &[u8]) -> [u8; 32] {
     let static_chunk = &_packed[..112];
-    let mut hash = anchor_lang::solana_program::hash::hash(&static_chunk);
+    let mut hash = anchor_lang::solana_program::hash::hash(static_chunk);
 
     let payload_chunk = &_packed[112..];
     let payload_length = payload_chunk.len();
     let chunk_length = 127;
-    for i in 0..(payload_length / chunk_length) {
+    for i in 0..=(payload_length / chunk_length) {
         let from = chunk_length * i;
-        let chunk = if from + chunk_length <= payload_length {
-            &payload_chunk[from..from + chunk_length]
+        let to: usize = if from + chunk_length <= payload_length {
+            from + chunk_length
         } else {
-            &payload_chunk[from..payload_length]
+            payload_length
         };
 
-        let mut encoded = [0u8; 64];
-        encoded[0..32].copy_from_slice(&hash.to_bytes());
-        encoded[32..].copy_from_slice(&anchor_lang::solana_program::hash::hash(&chunk).to_bytes());
+        let chunk = &payload_chunk[from..to];
+        let chunk_hash = anchor_lang::solana_program::hash::hash(chunk);
+        let encoded = [hash.to_bytes(), chunk_hash.to_bytes()].concat();
         hash = anchor_lang::solana_program::hash::hash(&encoded);
     }
 
-    return hash.to_bytes();
+    hash.to_bytes()
 }
 
 #[derive(Accounts)]
@@ -204,7 +201,6 @@ impl<'a, 'b, 'c, 'info> From<&mut SendMessage<'info>>
         CpiContext::new(cpi_program, cpi_accounts)
     }
 }
-
 
 #[derive(Accounts)]
 #[instruction(user_address: Pubkey, transfer_hash: [u8; 32])]
@@ -310,7 +306,7 @@ pub struct InitReceiveMessage<'info> {
 pub struct PayloadReceivedEvent {
     pub src_chain_id: u64,
     pub src_address: Pubkey,
-    pub tx_id: [u8; 16],
+    pub tx_id: u128,
     pub transfer_hash: [u8; 32],
 }
 
@@ -377,3 +373,31 @@ pub struct TransferSendingResultEvent {
     pub transfer_hash: [u8; 32],
     pub status_code: u8,
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use std::str::FromStr;
+
+//     use super::*;
+
+//     #[test]
+//     pub fn check_hash() {
+//         let message = InitMessage {
+//             src_chain_id: 50001,
+//             src_address: Pubkey::from_str("FsNa7kiksBmmJtyGjo8MyoQx3rHaSAsq8dFviD8L4Xgr").unwrap(),
+//             dst_chain_id: 40001,
+//             dst_address: Pubkey::from_str("DLwV9Chv99EkjL9jHg5WF8ZZmCW1ct9tuujEsnpGDx7r").unwrap(),
+//             tx_id: 25,
+//             payload: hex::decode("1c44a3873f17459db8f96b03b7f20c86ad087b9bade0182fb3f488e469ea25f10000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000000000000000019").unwrap(),
+//         };
+
+//         let buffer = serialize_init_message_eth(message);
+//         println!("buffer = 0x{}", hex::encode(&buffer));
+
+//         let buffer = hex::decode("000000000000c351dceb0c3c9bf2d2803ab41055508a4cbc7982c7ed8f3f7d3e78f7859da1ce13c70000000000009c41b767e295b7afe3891122fca8e0c3f5636b438b6feafe79a17ad12cb32cc6a1b900000000000000000000000000000000000000000000000000000000000000191c44a3873f17459db8f96b03b7f20c86ad087b9bade0182fb3f488e469ea25f10000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000000000000000019").unwrap();
+//         let hash = build_crosschain_hash(&buffer);
+//         println!("build_crosschain_hash = 0x{}", hex::encode(hash));
+//         let hash = anchor_lang::solana_program::hash::hash(&buffer);
+//         println!("regular hash = 0x{}", hex::encode(hash));
+//     }
+// }
