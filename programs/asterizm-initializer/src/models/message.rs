@@ -93,8 +93,6 @@ impl<'a, 'b, 'c, 'info> InitSendMessage<'info> {
     }
 }
 
-
-
 #[derive(Accounts)]
 #[instruction(relay_owner: Pubkey, src_address: Pubkey, transfer_hash: [u8; 32])]
 pub struct ResendMessage<'info> {

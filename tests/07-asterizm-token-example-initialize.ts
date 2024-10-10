@@ -22,7 +22,7 @@ describe("Asterizm token example initialize tests", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace
-    .AsterizmTokenExample as Program<AsterizmTokenExample>;
+      .AsterizmTokenExample as Program<AsterizmTokenExample>;
   const name = "asterizm";
   const decimals = 9;
   const amount = new BN(0);
@@ -42,20 +42,21 @@ describe("Asterizm token example initialize tests", () => {
     const init = new InitializeToken(program.methods);
 
     await init.createMint(
-      tokenClientOwner,
-      name,
-      decimals,
-      relayOwner!,
-      true,
-      true
+        tokenClientOwner,
+        name,
+        decimals,
+        relayOwner!,
+        true,
+        true,
+        new BN(0)
     );
   });
 
   it("Create Associated token account", async () => {
     const mintPda = getMintPda(
-      TOKEN_EXAMPLE_PROGRAM_ID,
-      tokenClientOwner.publicKey,
-      name
+        TOKEN_EXAMPLE_PROGRAM_ID,
+        tokenClientOwner.publicKey,
+        name
     );
 
     const to = await resolveAssociatedTokenAccount(mintPda, tokenClientOwner);
@@ -67,10 +68,10 @@ describe("Asterizm token example initialize tests", () => {
   it("Create token example trusted address", async () => {
     const client = new TrustedAddress(program.methods);
     await client.create(
-      tokenClientOwner,
-      name,
-      trustedUserAddress.publicKey,
-      chainId
+        tokenClientOwner,
+        name,
+        trustedUserAddress.publicKey,
+        chainId
     );
   });
 

@@ -13,6 +13,7 @@ use crate::asterizm_client::program::AsterizmClient;
 #[program]
 mod asterizm_token_example {
     use super::*;
+    use anchor_lang::system_program::{transfer, Transfer};
 
     pub fn send_message(
         ctx: Context<SendMessage>,
@@ -21,6 +22,17 @@ mod asterizm_token_example {
         dst_address: Pubkey,
         dst_chain_id: u64,
     ) -> Result<()> {
+        // transfer fee to token authority
+        let fee = ctx.accounts.token_client_account.fee;
+        let cpi_context = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.signer.to_account_info(),
+                to: ctx.accounts.token_authority.clone(),
+            },
+        );
+        transfer(cpi_context, fee)?;
+
         let seeds: &[&[_]] = &[
             &ctx.accounts.token_client_account.authority.to_bytes(),
             _name.as_bytes(),
@@ -107,9 +119,11 @@ mod asterizm_token_example {
         relay_owner: Pubkey,
         notify_transfer_sending_result: bool,
         disable_hash_validation: bool,
+        fee: u64,
     ) -> Result<()> {
         ctx.accounts.token_client_account.is_initialized = true;
         ctx.accounts.token_client_account.tx_id = 0;
+        ctx.accounts.token_client_account.fee = fee;
         ctx.accounts.token_client_account.authority = ctx.accounts.authority.key();
         ctx.accounts.token_client_account.bump = ctx.bumps.token_client_account;
 
@@ -129,6 +143,11 @@ mod asterizm_token_example {
             disable_hash_validation,
         )?;
 
+        Ok(())
+    }
+
+    pub fn update_fee(ctx: Context<UpdateFee>, _name: String, fee: u64) -> Result<()> {
+        ctx.accounts.token_client_account.fee = fee;
         Ok(())
     }
 
@@ -226,8 +245,11 @@ mod asterizm_token_example {
 pub struct SendMessage<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
+    #[account(mut)]
+    /// CHECK: This is not dangerous because we will check it inside mint and token_client_account
+    pub token_authority: AccountInfo<'info>,
     #[account(mut,
-        seeds = [&token_client_account.authority.to_bytes(), _name.as_bytes(), b"asterizm-token-mint"],
+        seeds = [&token_authority.key().as_ref(), _name.as_bytes(), b"asterizm-token-mint"],
         bump
     )]
     pub mint: Account<'info, Mint>,
@@ -238,7 +260,7 @@ pub struct SendMessage<'info> {
     )]
     pub from: Account<'info, TokenAccount>,
     #[account(mut,
-        seeds = [&token_client_account.authority.to_bytes(), _name.as_bytes(), b"asterizm-token-client"],
+        seeds = [&token_authority.key().as_ref(), _name.as_bytes(), b"asterizm-token-client"],
         bump = token_client_account.bump,
     )]
     pub token_client_account: Box<Account<'info, TokenClientAccount>>,
@@ -356,7 +378,8 @@ pub struct MintToUser<'info> {
 
 pub const TOKEN_CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
     + PUBKEY_BYTES                            // authority
-    + 128                                      // tx_id
+    + 128                                     // tx_id
+    + 64                                      // fee
     + 1                                       // bump
 ;
 
@@ -366,6 +389,7 @@ pub struct TokenClientAccount {
     pub is_initialized: bool,
     pub authority: Pubkey,
     pub tx_id: u128,
+    pub fee: u64,
     pub bump: u8,
 }
 
@@ -499,6 +523,19 @@ impl<'a, 'b, 'c, 'info> MintToUser<'info> {
         let cpi_program = self.token_program.to_account_info();
         CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
     }
+}
+
+#[derive(Accounts)]
+#[instruction(name: String)]
+pub struct UpdateFee<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [authority.key().as_ref(), name.as_bytes(), b"asterizm-token-client"],
+        bump = token_client_account.bump,
+    )]
+    pub token_client_account: Box<Account<'info, TokenClientAccount>>,
 }
 
 #[derive(Accounts)]

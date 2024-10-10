@@ -20,7 +20,8 @@ export class InitializeToken {
       decimals: number,
       relayOwner: PublicKey,
       notifyTransferSendingResult: boolean,
-      disableHashValidation: boolean
+      disableHashValidation: boolean,
+      fee: BN,
   ) {
     const tokenClientAccount = getTokenClientAccountPda(
         TOKEN_EXAMPLE_PROGRAM_ID,
@@ -40,7 +41,8 @@ export class InitializeToken {
             decimals,
             relayOwner,
             notifyTransferSendingResult,
-            disableHashValidation
+            disableHashValidation,
+            fee
         )
         .accountsPartial({
           authority: authority.publicKey,
@@ -58,7 +60,8 @@ export class InitializeToken {
       decimals: number,
       relayOwner: PublicKey,
       notifyTransferSendingResult: boolean,
-      disableHashValidation: boolean
+      disableHashValidation: boolean,
+      fee: BN,
   ): Promise<TransactionInstruction> {
     const tokenClientAccount = getTokenClientAccountPda(
         TOKEN_EXAMPLE_PROGRAM_ID,
@@ -78,7 +81,8 @@ export class InitializeToken {
             decimals,
             relayOwner,
             notifyTransferSendingResult,
-            disableHashValidation
+            disableHashValidation,
+            fee
         )
         .accountsPartial({
           authority: authority.publicKey,
@@ -109,6 +113,20 @@ export class InitializeToken {
           authority: authority.publicKey,
           tokenAccount: toAta,
           tokenClientAccount,
+        })
+        .signers([authority])
+        .rpc();
+  }
+
+  async updateFee(
+      authority: Keypair,
+      name: string,
+      fee: BN,
+  ) {
+    await this.programAPI
+        .updateFee(name, fee)
+        .accountsPartial({
+          authority: authority.publicKey,
         })
         .signers([authority])
         .rpc();

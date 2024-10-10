@@ -13,6 +13,7 @@ import {getOrCreateAssociatedTokenAccount} from "@solana/spl-token";
 import {TrustedAddress} from "../../sdk/ts/token/trusted_address";
 import {AsterizmRelayer} from "../../target/types/asterizm_relayer";
 import {ClientSender} from "../../sdk/ts/token/client_sender";
+import { BN } from "bn.js";
 
 const main = async () => {
     const payer = await getPayerFromConfig();
@@ -29,6 +30,12 @@ const main = async () => {
             name: "decimals",
             message: "Token decimals",
             initial: 9,
+        },
+        {
+            type: "number",
+            name: "fee",
+            message: "User fee",
+            initial: 0,
         },
         {
             type: "text",
@@ -67,6 +74,7 @@ const main = async () => {
 
     const name = response.tokenName;
     const decimals = response.decimals;
+    const fee = new BN(response.fee);
 
     if (response.tokenAddress == '0') {
         const clientInit = new InitializeToken(programToken.methods);
@@ -76,7 +84,8 @@ const main = async () => {
             decimals,
             payer!.publicKey,
             true,
-            true
+            true,
+            fee
         );
 
         return;
@@ -88,15 +97,12 @@ const main = async () => {
         payer!.publicKey,
         name
     );
-    const tokenAccount = await getOrCreateAssociatedTokenAccount(
+    await getOrCreateAssociatedTokenAccount(
         connection,
         payer!,
         mintPda,
         payer!.publicKey
     ).then((ac) => ac.address);
-
-    console.log("Token account address: " + tokenAccount);
-    return;
 
 
 

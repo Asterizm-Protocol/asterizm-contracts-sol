@@ -247,7 +247,11 @@ pub mod asterizm_relayer {
             relay_account_owner: ctx.accounts.relay_account_owner.key()
         });
 
-        emit!(ResendFailedTransferEvent { value, transfer_hash, src_address });
+        emit!(ResendFailedTransferEvent {
+            value,
+            transfer_hash,
+            src_address
+        });
 
         Ok(())
     }

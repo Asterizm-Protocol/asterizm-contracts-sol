@@ -51,14 +51,14 @@ const main = async () => {
             type: "text",
             name: "tokenName",
             message: "Token name",
-            initial: 'AsterizmToken1',
+            initial: 'AsterizmToken2',
         },
         {
             type: "text",
             name: "targetAddress",
             message: "targetAddress (address for sending tokens in destination chain)",
-            // initial: "1111111111114UvN6QyVLXZB3iKg2QrfRUUYdVhM",
-            initial: "2uM7xmDQMTqYvLLsDCcwQgGVeoTaFoEswwRzEj8Yxfax",
+            initial: "1111111111114UvN6QyVLXZB3iKg2QrfRUUYdVhM",
+            // initial: "2uM7xmDQMTqYvLLsDCcwQgGVeoTaFoEswwRzEj8Yxfax",
         },
         {
             type: "text",
@@ -70,8 +70,8 @@ const main = async () => {
             type: "text",
             name: "dstAddress",
             message: "dstAddress (address on other blockchain side, needed to be in trusted addresses)",
-            // initial: "1111111111114MaFcXR65rueYpZ3fvikn5V2JEi7",
-            initial: "DLwV9Chv99EkjL9jHg5WF8ZZmCW1ct9tuujEsnpGDx7r",
+            initial: "1111111111114MaFcXR65rueYpZ3fvikn5V2JEi7",
+            // initial: "DLwV9Chv99EkjL9jHg5WF8ZZmCW1ct9tuujEsnpGDx7r",
         },
         {
             type: "number",

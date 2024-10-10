@@ -387,17 +387,21 @@ pub struct TransferSendingResultEvent {
 //             src_address: Pubkey::from_str("FsNa7kiksBmmJtyGjo8MyoQx3rHaSAsq8dFviD8L4Xgr").unwrap(),
 //             dst_chain_id: 40001,
 //             dst_address: Pubkey::from_str("DLwV9Chv99EkjL9jHg5WF8ZZmCW1ct9tuujEsnpGDx7r").unwrap(),
-//             tx_id: 25,
-//             payload: hex::decode("1c44a3873f17459db8f96b03b7f20c86ad087b9bade0182fb3f488e469ea25f10000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000000000000000019").unwrap(),
+//             tx_id: 33,
+//             payload: hex::decode("1c44a3873f17459db8f96b03b7f20c86ad087b9bade0182fb3f488e469ea25f100000000000000000000000000000000000000000000000000000000b2d05e000000000000000000000000000000000000000000000000000000000000000021").unwrap(),
 //         };
 
 //         let buffer = serialize_init_message_eth(message);
 //         println!("buffer = 0x{}", hex::encode(&buffer));
 
-//         let buffer = hex::decode("000000000000c351dceb0c3c9bf2d2803ab41055508a4cbc7982c7ed8f3f7d3e78f7859da1ce13c70000000000009c41b767e295b7afe3891122fca8e0c3f5636b438b6feafe79a17ad12cb32cc6a1b900000000000000000000000000000000000000000000000000000000000000191c44a3873f17459db8f96b03b7f20c86ad087b9bade0182fb3f488e469ea25f10000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000000000000000000019").unwrap();
 //         let hash = build_crosschain_hash(&buffer);
 //         println!("build_crosschain_hash = 0x{}", hex::encode(hash));
 //         let hash = anchor_lang::solana_program::hash::hash(&buffer);
 //         println!("regular hash = 0x{}", hex::encode(hash));
+
+//         let data = base64::decode("ao2ZtXt6GeRBnAAAAAAAALdn4pW3r+OJESL8qODD9WNrQ4tv6v55oXrRLLMsxqG5IQAAAAAAAAAAAAAAAAAAAADFfmyycLG6PxioflC9vAUilqUg//XNqZ4ogJaFNIVLYAAAABxEo4c/F0WduPlrA7fyDIatCHubreAYL7P0iORp6iXxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALLQXgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQ==").unwrap();
+//         println!("data = 0x{}", hex::encode(&data));
+//         let event = InitiateTransferEvent::try_from_slice(&data[8..]).unwrap();
+//         println!("hash event = 0x{}", hex::encode(event.transfer_hash));
 //     }
 // }
