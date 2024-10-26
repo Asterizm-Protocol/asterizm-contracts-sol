@@ -2,13 +2,16 @@
 
 Asterizm protocol affords receive and send cross chain transfer of any messages  
 
+## Documentation
+See [DOCS.md](./DOCS.md) or visit [Asterizm Docs](https://docs.asterizm.io/)
+
 ## Settings
 
 Current programs are written with the usage of `Solana` version 1.18.20 and `Anchor` version 0.30.1.
 
 ### Installation
 
-`Solana` can be installed by [this lint](https://docs.solanalabs.com/cli/install). 
+`Solana` can be installed by [this link](https://docs.solanalabs.com/cli/install). 
 `Anchor` installation docs can be taken from [here](https://www.anchor-lang.com/docs/installation).
 
 ### Build
