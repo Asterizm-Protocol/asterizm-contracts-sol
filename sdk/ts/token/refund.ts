@@ -2,39 +2,35 @@ import {Keypair, PublicKey, TransactionInstruction} from "@solana/web3.js";
 import {
   CLIENT_PROGRAM_ID,
   ITokenExampleProgramAPI,
-  RELAYER_PROGRAM_ID,
   TOKEN_EXAMPLE_PROGRAM_ID,
 } from "../program";
-import BN from "bn.js";
 import {
-  getChainPda,
   getClientAccountPda,
-  getIncomingTransferAccountPda,
   getOutgoingTransferAccountPda,
-  getSenderAccountPda,
-  getSettingsPda,
+  getRefundAccountPda,
+  getRefundTransferAccountPda,
   getTokenClientAccountPda,
 } from "../pda";
 
 export class TokenMessage {
   constructor(private readonly programAPI: ITokenExampleProgramAPI) {}
 
-  async send(
+  async addRefundRequest(
     signer: Keypair,
     authority: PublicKey,
-    dstChainId: BN,
-    toAddress: PublicKey,
-    amount: BN,
     name: string,
-    mint: PublicKey,
-    from: PublicKey,
     transferHash: number[],
-    trustedAddress: PublicKey
   ) {
     const tokenClientAccount = getTokenClientAccountPda(
       TOKEN_EXAMPLE_PROGRAM_ID,
       authority,
       name
+    );
+
+    const refundTransferAccount = getRefundTransferAccountPda(
+      TOKEN_EXAMPLE_PROGRAM_ID,
+      authority,
+      transferHash
     );
 
     const transferAccount = getOutgoingTransferAccountPda(
@@ -43,49 +39,95 @@ export class TokenMessage {
       transferHash
     );
 
-    const clientSettingsAccount = getSettingsPda(CLIENT_PROGRAM_ID);
-
-    const chainAccount = getChainPda(RELAYER_PROGRAM_ID, dstChainId);
-
     const clientAccount = getClientAccountPda(
       CLIENT_PROGRAM_ID,
       tokenClientAccount
     );
 
+    const clientRefundAccount = getRefundAccountPda(
+      CLIENT_PROGRAM_ID,
+      tokenClientAccount,
+      transferHash
+    );
+
     await this.programAPI
-      .sendMessage(name, transferHash, amount, toAddress, dstChainId)
+      .addRefundRequest(name, transferHash)
       .accountsPartial({
         signer: signer.publicKey,
         tokenAuthority: authority,
         clientAccount,
         tokenClientAccount,
-        mint,
-        from,
-        clientSettingsAccount,
-        trustedAddress,
         transferAccount,
-        chainAccount,
-        relayerProgram: RELAYER_PROGRAM_ID,
+        refundTransferAccount,
+        clientRefundAccount,
       })
       .signers([signer])
       .rpc();
   }
 
-  async sendInstruction(
+  async addRefundRequestInstruction(
     signer: Keypair,
     authority: PublicKey,
-    dstChainId: BN,
-    toAddress: PublicKey,
-    amount: BN,
     name: string,
-    mint: PublicKey,
-    from: PublicKey,
     transferHash: number[],
-    trustedAddress: PublicKey
   ): Promise<TransactionInstruction> {
     const tokenClientAccount = getTokenClientAccountPda(
       TOKEN_EXAMPLE_PROGRAM_ID,
       authority,
+      name
+    );
+
+    const refundTransferAccount = getRefundTransferAccountPda(
+      TOKEN_EXAMPLE_PROGRAM_ID,
+      authority,
+      transferHash
+    );
+
+    const transferAccount = getOutgoingTransferAccountPda(
+      CLIENT_PROGRAM_ID,
+      tokenClientAccount,
+      transferHash
+    );
+
+    const clientAccount = getClientAccountPda(
+      CLIENT_PROGRAM_ID,
+      tokenClientAccount
+    );
+
+    const clientRefundAccount = getRefundAccountPda(
+      CLIENT_PROGRAM_ID,
+      tokenClientAccount,
+      transferHash
+    );
+
+    return this.programAPI
+      .addRefundRequest(name, transferHash)
+      .accountsPartial({
+        signer: signer.publicKey,
+        tokenAuthority: authority,
+        clientAccount,
+        tokenClientAccount,
+        transferAccount,
+        refundTransferAccount,
+        clientRefundAccount,
+      })
+      .signers([signer])
+      .instruction();
+  }
+
+  async processRefundRequest(
+    authority: Keypair,
+    name: string,
+    transferHash: number[],
+    status: boolean,
+    mint: PublicKey,
+    clientAccountPda: PublicKey,
+    to: PublicKey,
+    toAta: PublicKey
+  ) {
+    const tokenClientAccount = getTokenClientAccountPda(
+      TOKEN_EXAMPLE_PROGRAM_ID,
+      authority.publicKey,
       name
     );
 
@@ -95,141 +137,67 @@ export class TokenMessage {
       transferHash
     );
 
-    const clientSettingsAccount = getSettingsPda(CLIENT_PROGRAM_ID);
-
-    const chainAccount = getChainPda(RELAYER_PROGRAM_ID, dstChainId);
-
-    const clientAccount = getClientAccountPda(
-      CLIENT_PROGRAM_ID,
-      tokenClientAccount
-    );
-
-    return this.programAPI
-      .sendMessage(name, transferHash, amount, toAddress, dstChainId)
-      .accountsPartial({
-        signer: signer.publicKey,
-        tokenAuthority: authority,
-        clientAccount,
-        tokenClientAccount,
-        mint,
-        from,
-        clientSettingsAccount,
-        trustedAddress,
-        transferAccount,
-        chainAccount,
-        relayerProgram: RELAYER_PROGRAM_ID,
-      })
-      .signers([signer])
-      .instruction();
-  }
-
-  async receive(
-    authority: Keypair,
-    name: string,
-    transferHash: number[],
-    srcChainId: BN,
-    srcAddress: PublicKey,
-    txId: BN,
-    payload: Buffer,
-    mint: PublicKey,
-    clientAccountPda: PublicKey,
-    clientTrustedAddressPda: PublicKey,
-    dstAddress: PublicKey,
-    to: PublicKey,
-    toAta: PublicKey
-  ) {
-    const chainAccount = getChainPda(RELAYER_PROGRAM_ID, srcChainId);
-
-    const clientSettingsAccount = getSettingsPda(CLIENT_PROGRAM_ID);
-
-    const transferAccountPda = getIncomingTransferAccountPda(
-      CLIENT_PROGRAM_ID,
-      dstAddress,
-      transferHash
-    );
-    const tokenClientAccount = getTokenClientAccountPda(
-      TOKEN_EXAMPLE_PROGRAM_ID,
-      authority.publicKey,
-      name
-    );
-
-    const clientSender = getSenderAccountPda(
+    const clientRefundAccount = getRefundAccountPda(
       CLIENT_PROGRAM_ID,
       tokenClientAccount,
-      authority.publicKey
+      transferHash
     );
 
     await this.programAPI
-      .receiveMessage(name, transferHash, srcChainId, srcAddress, txId, payload)
+      .processRefundRequest(name, transferHash, status)
       .accountsPartial({
-        authority: authority.publicKey,
-        transferAccount: transferAccountPda,
+        signer: authority.publicKey,
+        transferAccount,
         clientAccount: clientAccountPda,
-        clientTrustedAddress: clientTrustedAddressPda,
         mint,
-        clientSettingsAccount,
         to,
         tokenAccount: toAta,
-        chainAccount,
         tokenClientAccount,
-        relayerProgram: RELAYER_PROGRAM_ID,
-        clientSender,
+        clientRefundAccount,
       })
       .signers([authority])
-      .rpc({ skipPreflight: true });
+      .rpc();
   }
 
-  async receiveInstruction(
+  async processRefundRequestInstruction(
     authority: Keypair,
     name: string,
     transferHash: number[],
-    srcChainId: BN,
-    srcAddress: PublicKey,
-    txId: BN,
-    payload: Buffer,
+    status: boolean,
     mint: PublicKey,
     clientAccountPda: PublicKey,
-    clientTrustedAddressPda: PublicKey,
-    dstAddress: PublicKey,
     to: PublicKey,
     toAta: PublicKey
   ): Promise<TransactionInstruction> {
-    const chainAccount = getChainPda(RELAYER_PROGRAM_ID, srcChainId);
-
-    const clientSettingsAccount = getSettingsPda(CLIENT_PROGRAM_ID);
-
-    const transferAccountPda = getIncomingTransferAccountPda(
-      CLIENT_PROGRAM_ID,
-      dstAddress,
-      transferHash
-    );
     const tokenClientAccount = getTokenClientAccountPda(
       TOKEN_EXAMPLE_PROGRAM_ID,
       authority.publicKey,
       name
     );
 
-    const clientSender = getSenderAccountPda(
+    const transferAccount = getOutgoingTransferAccountPda(
       CLIENT_PROGRAM_ID,
       tokenClientAccount,
-      authority.publicKey
+      transferHash
+    );
+
+    const clientRefundAccount = getRefundAccountPda(
+      CLIENT_PROGRAM_ID,
+      tokenClientAccount,
+      transferHash
     );
 
     return this.programAPI
-      .receiveMessage(name, transferHash, srcChainId, srcAddress, txId, payload)
+      .processRefundRequest(name, transferHash, status)
       .accountsPartial({
-        authority: authority.publicKey,
-        transferAccount: transferAccountPda,
+        signer: authority.publicKey,
+        transferAccount,
         clientAccount: clientAccountPda,
-        clientTrustedAddress: clientTrustedAddressPda,
         mint,
-        clientSettingsAccount,
         to,
         tokenAccount: toAta,
-        chainAccount,
         tokenClientAccount,
-        relayerProgram: RELAYER_PROGRAM_ID,
-        clientSender,
+        clientRefundAccount,
       })
       .signers([authority])
       .instruction();

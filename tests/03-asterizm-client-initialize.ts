@@ -84,7 +84,8 @@ describe("Asterizm client initialize tests", () => {
       clientUserAddress.publicKey,
       relayOwner!,
       true,
-      true
+      true,
+      true,
     );
     const clientAccountPda = getClientAccountPda(
       program.programId,
@@ -107,7 +108,8 @@ describe("Asterizm client initialize tests", () => {
       clientUserAddress.publicKey,
       relayOwner!,
       false,
-      true
+      true,
+      true,
     );
 
     const clientAccountPda = getClientAccountPda(

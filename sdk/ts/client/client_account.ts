@@ -9,14 +9,16 @@ export class ClientAccount {
     userAddress: PublicKey,
     relayOwner: PublicKey,
     notifyTransferSendingResult: boolean,
-    disableHashValidation: boolean
+    disableHashValidation: boolean,
+    refundEnabled: boolean,
   ) {
     await this.programAPI
       .createClient(
         userAddress,
         relayOwner,
         notifyTransferSendingResult,
-        disableHashValidation
+        disableHashValidation,
+        refundEnabled
       )
       .accounts({
         authority: authority.publicKey,
@@ -30,14 +32,16 @@ export class ClientAccount {
     userAddress: PublicKey,
     relayOwner: PublicKey,
     notifyTransferSendingResult: boolean,
-    disableHashValidation: boolean
+    disableHashValidation: boolean,
+    refundEnabled: boolean,
   ) {
     await this.programAPI
       .updateClient(
         userAddress,
         relayOwner,
         notifyTransferSendingResult,
-        disableHashValidation
+        disableHashValidation,
+        refundEnabled
       )
       .accounts({
         authority: authority.publicKey,

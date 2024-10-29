@@ -237,6 +237,7 @@ pub mod asterizm_nft_example {
         relay_owner: Pubkey,
         notify_transfer_sending_result: bool,
         disable_hash_validation: bool,
+        refund_enabled: bool,
     ) -> Result<()> {
         ctx.accounts.nft_client_account.is_initialized = true;
         ctx.accounts.nft_client_account.authority = ctx.accounts.authority.key();
@@ -256,6 +257,7 @@ pub mod asterizm_nft_example {
             relay_owner,
             notify_transfer_sending_result,
             disable_hash_validation,
+            refund_enabled,
         )?;
 
         Ok(())
@@ -266,6 +268,7 @@ pub mod asterizm_nft_example {
         relay_owner: Pubkey,
         notify_transfer_sending_result: bool,
         disable_hash_validation: bool,
+        refund_enabled: bool,
     ) -> Result<()> {
         let seeds: &[&[_]] = &[
             &ctx.accounts.nft_client_account.authority.to_bytes(),
@@ -280,6 +283,7 @@ pub mod asterizm_nft_example {
             relay_owner,
             notify_transfer_sending_result,
             disable_hash_validation,
+            refund_enabled,
         )?;
 
         Ok(())

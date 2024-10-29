@@ -7,7 +7,7 @@ declare_id!("AsUG3qmKKMjEYZDCTqo4hJEnLmxGj82SDGiXci1hNFBx");
 
 declare_program!(asterizm_client);
 
-use crate::asterizm_client::accounts::{ClientAccount, ClientTrustedAddress};
+use crate::asterizm_client::accounts::{ClientAccount, ClientTrustedAddress, TransferAccount};
 use crate::asterizm_client::program::AsterizmClient;
 
 #[program]
@@ -18,6 +18,7 @@ mod asterizm_token_example {
     pub fn send_message(
         ctx: Context<SendMessage>,
         _name: String,
+        transfer_hash: [u8; 32],
         amount: u64,
         dst_address: Pubkey,
         dst_chain_id: u64,
@@ -61,6 +62,19 @@ mod asterizm_token_example {
 
         ctx.accounts.token_client_account.tx_id += 1;
 
+        ctx.accounts.refund_transfer_account.is_initialized = true;
+        ctx.accounts.refund_transfer_account.amount = amount;
+        ctx.accounts.refund_transfer_account.user_address = ctx.accounts.signer.key();
+        ctx.accounts.refund_transfer_account.token_address = ctx.accounts.from.key();
+        ctx.accounts.refund_transfer_account.bump = ctx.bumps.refund_transfer_account;
+
+        emit!(AddTransferEvent {
+            transfer_hash,
+            amount,
+            user_address: ctx.accounts.signer.key(),
+            token_address: ctx.accounts.from.key(),
+        });
+
         Ok(())
     }
 
@@ -100,6 +114,70 @@ mod asterizm_token_example {
         mint_to(ctx.accounts.to_mint_cpi(signer), data.amount)
     }
 
+    pub fn add_refund_request(
+        ctx: Context<AddRefundRequest>,
+        _name: String,
+        transfer_hash: [u8; 32],
+    ) -> Result<()> {
+        let seeds: &[&[_]] = &[
+            &ctx.accounts.token_client_account.authority.to_bytes(),
+            _name.as_bytes(),
+            b"asterizm-token-client",
+            &[ctx.accounts.token_client_account.bump],
+        ];
+        let signer: &[&[&[u8]]] = &[&seeds[..]];
+
+        asterizm_client::cpi::add_refund_request(
+            ctx.accounts.to_add_refund_request(signer),
+            ctx.accounts.token_client_account.key(),
+            transfer_hash,
+        )?;
+
+        Ok(())
+    }
+
+    pub fn process_refund_request(
+        ctx: Context<ProcessRefundRequest>,
+        _name: String,
+        transfer_hash: [u8; 32],
+        status: bool,
+    ) -> Result<()> {
+        let seeds: &[&[_]] = &[
+            &ctx.accounts.token_client_account.authority.to_bytes(),
+            _name.as_bytes(),
+            b"asterizm-token-client",
+            &[ctx.accounts.token_client_account.bump],
+        ];
+        let signer: &[&[&[u8]]] = &[&seeds[..]];
+
+        asterizm_client::cpi::process_refund_request(
+            ctx.accounts.to_process_refund_request(signer),
+            ctx.accounts.token_client_account.key(),
+            transfer_hash,
+            status,
+        )?;
+
+        if status {
+            // transfer refund fee to token authority
+            let refund_fee = ctx.accounts.token_client_account.refund_fee;
+            let cpi_context = CpiContext::new(
+                ctx.accounts.system_program.to_account_info(),
+                Transfer {
+                    from: ctx.accounts.signer.to_account_info(),
+                    to: ctx.accounts.token_authority.clone(),
+                },
+            );
+            transfer(cpi_context, refund_fee)?;
+
+            mint_to(
+                ctx.accounts.to_mint_cpi(signer),
+                ctx.accounts.refund_transfer_account.amount,
+            )?;
+        }
+
+        Ok(())
+    }
+
     pub fn mint_to_user(ctx: Context<MintToUser>, name: String, amount: u64) -> Result<()> {
         let seeds: &[&[_]] = &[
             &ctx.accounts.token_client_account.authority.to_bytes(),
@@ -119,11 +197,14 @@ mod asterizm_token_example {
         relay_owner: Pubkey,
         notify_transfer_sending_result: bool,
         disable_hash_validation: bool,
+        refund_enabled: bool,
         fee: u64,
+        refund_fee: u64,
     ) -> Result<()> {
         ctx.accounts.token_client_account.is_initialized = true;
         ctx.accounts.token_client_account.tx_id = 0;
         ctx.accounts.token_client_account.fee = fee;
+        ctx.accounts.token_client_account.refund_fee = refund_fee;
         ctx.accounts.token_client_account.authority = ctx.accounts.authority.key();
         ctx.accounts.token_client_account.bump = ctx.bumps.token_client_account;
 
@@ -141,13 +222,20 @@ mod asterizm_token_example {
             relay_owner,
             notify_transfer_sending_result,
             disable_hash_validation,
+            refund_enabled,
         )?;
 
         Ok(())
     }
 
-    pub fn update_fee(ctx: Context<UpdateFee>, _name: String, fee: u64) -> Result<()> {
+    pub fn update_fee(
+        ctx: Context<UpdateFee>,
+        _name: String,
+        fee: u64,
+        refund_fee: u64,
+    ) -> Result<()> {
         ctx.accounts.token_client_account.fee = fee;
+        ctx.accounts.token_client_account.refund_fee = refund_fee;
         Ok(())
     }
 
@@ -241,7 +329,7 @@ mod asterizm_token_example {
 }
 
 #[derive(Accounts)]
-#[instruction(_name: String)]
+#[instruction(_name: String, transfer_hash: [u8; 32],)]
 pub struct SendMessage<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -264,6 +352,14 @@ pub struct SendMessage<'info> {
         bump = token_client_account.bump,
     )]
     pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+    #[account(
+        init,
+        payer = signer,
+        space = 8 + TOKEN_CLIENT_ACCOUNT_LEN,
+        seeds = [token_authority.key().as_ref(), &transfer_hash, b"refund-transfer"],
+        bump
+    )]
+    pub refund_transfer_account: Box<Account<'info, RefundTransferAccount>>,
     pub token_program: Program<'info, Token>,
     pub client_program: Program<'info, AsterizmClient>,
     /// CHECK: This is not dangerous because we will check it inside client
@@ -273,8 +369,8 @@ pub struct SendMessage<'info> {
     pub client_account: Box<Account<'info, ClientAccount>>,
     /// CHECK: This is not dangerous because we will check it inside client
     pub trusted_address: AccountInfo<'info>,
-    #[account(mut)]
     /// CHECK: This is not dangerous because we will check it inside client
+    #[account(mut)]
     pub transfer_account: AccountInfo<'info>,
     pub rent: Sysvar<'info, Rent>,
     pub system_program: Program<'info, System>,
@@ -282,6 +378,14 @@ pub struct SendMessage<'info> {
     pub chain_account: AccountInfo<'info>,
     /// CHECK: This is not dangerous because we will check it inside client
     pub relayer_program: AccountInfo<'info>,
+}
+
+#[event]
+pub struct AddTransferEvent {
+    pub transfer_hash: [u8; 32],
+    pub user_address: Pubkey,
+    pub amount: u64,
+    pub token_address: Pubkey,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Default, Debug)]
@@ -314,6 +418,103 @@ pub fn deserialize_message_payload_eth(payload: &[u8]) -> Result<MessagePayload>
         amount,
         tx_id,
     })
+}
+
+pub const REFUND_TRANSFER_ACCOUNT_LEN: usize = 1    // is is_initialized
+    + PUBKEY_BYTES                                  // user_address
+    + 64                                            // amount
+    + PUBKEY_BYTES                                  // token_address
+    + 1                                             // bump
+;
+
+#[account]
+#[derive(Default)]
+pub struct RefundTransferAccount {
+    pub is_initialized: bool,
+    pub user_address: Pubkey,
+    pub amount: u64,
+    pub token_address: Pubkey,
+    pub bump: u8,
+}
+
+#[derive(Accounts)]
+#[instruction(_name: String, _transfer_hash: [u8; 32],)]
+pub struct AddRefundRequest<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    #[account(mut)]
+    /// CHECK: This is not dangerous because we will check it inside mint and token_client_account
+    pub token_authority: AccountInfo<'info>,
+    #[account(mut,
+        seeds = [&token_authority.key().as_ref(), _name.as_bytes(), b"asterizm-token-client"],
+        bump = token_client_account.bump,
+    )]
+    pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+    pub client_program: Program<'info, AsterizmClient>,
+    #[account(mut)]
+    /// CHECK: This is not dangerous because we will check it inside client
+    pub client_account: Box<Account<'info, ClientAccount>>,
+    #[account(mut,
+        seeds = ["outgoing_transfer".as_bytes(), &token_client_account.key().as_ref(), &_transfer_hash],
+        bump = transfer_account.bump,
+        seeds::program = client_program.key()
+    )]
+    pub transfer_account: Account<'info, TransferAccount>,
+    #[account(
+        seeds = [token_authority.key().as_ref(), &_transfer_hash, b"refund-transfer"],
+        bump = refund_transfer_account.bump,
+        constraint = refund_transfer_account.user_address == signer.key()
+    )]
+    pub refund_transfer_account: Box<Account<'info, RefundTransferAccount>>,
+    /// CHECK: This is not dangerous because we will check it inside client
+    pub client_refund_account: AccountInfo<'info>,
+    pub rent: Sysvar<'info, Rent>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+#[instruction(_name: String, _transfer_hash: [u8; 32],)]
+pub struct ProcessRefundRequest<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    #[account(mut)]
+    /// CHECK: This is not dangerous because we will check it inside mint and token_client_account
+    pub token_authority: AccountInfo<'info>,
+    #[account(mut,
+        seeds = [&token_authority.key().as_ref(), _name.as_bytes(), b"asterizm-token-client"],
+        bump = token_client_account.bump,
+    )]
+    pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+    #[account(mut)]
+    pub mint: Account<'info, Mint>,
+    /// CHECK: This is not dangerous because we will check it inside client
+    pub to: AccountInfo<'info>,
+    #[account(
+        mut,
+        token::mint = mint,
+        token::authority = to,
+    )]
+    pub token_account: Account<'info, TokenAccount>,
+    pub token_program: Program<'info, Token>,
+    pub client_program: Program<'info, AsterizmClient>,
+    /// CHECK: This is not dangerous because we will check it inside client
+    pub client_account: Box<Account<'info, ClientAccount>>,
+    #[account(mut,
+        seeds = ["outgoing_transfer".as_bytes(), &token_client_account.key().as_ref(), &_transfer_hash],
+        bump = transfer_account.bump,
+        seeds::program = client_program.key()
+    )]
+    pub transfer_account: Account<'info, TransferAccount>,
+    #[account(
+        seeds = [token_authority.key().as_ref(), &_transfer_hash, b"refund-transfer"],
+        bump = refund_transfer_account.bump,
+        constraint = refund_transfer_account.user_address == to.key() && refund_transfer_account.token_address == token_account.key()
+    )]
+    pub refund_transfer_account: Box<Account<'info, RefundTransferAccount>>,
+    /// CHECK: This is not dangerous because we will check it inside client
+    pub client_refund_account: AccountInfo<'info>,
+    pub rent: Sysvar<'info, Rent>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
@@ -380,6 +581,7 @@ pub const TOKEN_CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
     + PUBKEY_BYTES                            // authority
     + 128                                     // tx_id
     + 64                                      // fee
+    + 64                                      // refund_fee
     + 1                                       // bump
 ;
 
@@ -390,6 +592,7 @@ pub struct TokenClientAccount {
     pub authority: Pubkey,
     pub tx_id: u128,
     pub fee: u64,
+    pub refund_fee: u64,
     pub bump: u8,
 }
 
@@ -467,11 +670,31 @@ impl<'a, 'b, 'c, 'info> SendMessage<'info> {
             settings_account: self.client_settings_account.to_account_info(),
             client_account: self.client_account.to_account_info(),
             trusted_address: self.trusted_address.clone(),
-            transfer_account: self.transfer_account.clone(),
+            transfer_account: self.transfer_account.to_account_info(),
             rent: self.rent.to_account_info(),
             system_program: self.system_program.to_account_info(),
             chain_account: self.chain_account.clone(),
             relayer_program: self.relayer_program.to_account_info(),
+        };
+        let cpi_program = self.client_program.to_account_info();
+        CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
+    }
+}
+
+impl<'a, 'b, 'c, 'info> AddRefundRequest<'info> {
+    fn to_add_refund_request(
+        &self,
+        seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, asterizm_client::cpi::accounts::AddRefundRequest<'info>>
+    {
+        let cpi_accounts = asterizm_client::cpi::accounts::AddRefundRequest {
+            signer: self.signer.to_account_info(),
+            authority: self.token_client_account.to_account_info(),
+            client_account: self.client_account.to_account_info(),
+            transfer_account: self.transfer_account.to_account_info(),
+            refund_account: self.client_refund_account.clone(),
+            rent: self.rent.to_account_info(),
+            system_program: self.system_program.to_account_info(),
         };
         let cpi_program = self.client_program.to_account_info();
         CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
@@ -521,6 +744,35 @@ impl<'a, 'b, 'c, 'info> MintToUser<'info> {
             mint: self.mint.to_account_info(),
         };
         let cpi_program = self.token_program.to_account_info();
+        CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
+    }
+}
+
+impl<'a, 'b, 'c, 'info> ProcessRefundRequest<'info> {
+    fn to_mint_cpi(
+        &self,
+        seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, MintTo<'info>> {
+        let cpi_accounts = MintTo {
+            authority: self.token_client_account.to_account_info(),
+            to: self.token_account.to_account_info(),
+            mint: self.mint.to_account_info(),
+        };
+        let cpi_program = self.token_program.to_account_info();
+        CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
+    }
+    fn to_process_refund_request(
+        &self,
+        seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, asterizm_client::cpi::accounts::ProcessRefundRequest<'info>>
+    {
+        let cpi_accounts = asterizm_client::cpi::accounts::ProcessRefundRequest {
+            authority: self.token_client_account.to_account_info(),
+            client_account: self.client_account.to_account_info(),
+            transfer_account: self.transfer_account.to_account_info(),
+            refund_account: self.client_refund_account.clone(),
+        };
+        let cpi_program = self.client_program.to_account_info();
         CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
     }
 }

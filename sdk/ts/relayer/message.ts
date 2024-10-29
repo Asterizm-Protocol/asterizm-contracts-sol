@@ -157,4 +157,27 @@ export class RelayMessage {
       .signers([authority])
       .instruction();
   }
+
+  async transferSendingResult(
+    authority: Keypair,
+    relayOwner: PublicKey,
+    dstAddress: PublicKey,
+    statusCode: number,
+    transferHash: number[],
+    clientAccountPda: PublicKey,
+  ) {
+    this.programAPI
+      .transferSendingResult(
+        relayOwner,
+        dstAddress,
+        transferHash,
+        statusCode
+      )
+      .accounts({
+        authority: authority.publicKey,
+        clientAccount: clientAccountPda,
+      })
+      .signers([authority])
+      .rpc()
+  }
 }

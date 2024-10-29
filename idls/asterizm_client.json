@@ -8,6 +8,209 @@
   },
   "instructions": [
     {
+      "name": "add_refund_request",
+      "discriminator": [
+        13,
+        38,
+        189,
+        91,
+        62,
+        11,
+        64,
+        40
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "client_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transfer_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  117,
+                  116,
+                  103,
+                  111,
+                  105,
+                  110,
+                  103,
+                  95,
+                  116,
+                  114,
+                  97,
+                  110,
+                  115,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              },
+              {
+                "kind": "arg",
+                "path": "transfer_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "refund_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              },
+              {
+                "kind": "arg",
+                "path": "transfer_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_user_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "confirm_incoming_refund",
+      "discriminator": [
+        203,
+        47,
+        207,
+        235,
+        160,
+        198,
+        44,
+        155
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "client_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transfer_account",
+          "writable": true
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "user_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "create_client",
       "discriminator": [
         155,
@@ -92,6 +295,10 @@
         },
         {
           "name": "disable_hash_validation",
+          "type": "bool"
+        },
+        {
+          "name": "refund_enabled",
           "type": "bool"
         }
       ]
@@ -659,6 +866,131 @@
         {
           "name": "manager",
           "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "process_refund_request",
+      "discriminator": [
+        104,
+        191,
+        60,
+        221,
+        225,
+        67,
+        60,
+        67
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "client_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transfer_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  117,
+                  116,
+                  103,
+                  111,
+                  105,
+                  110,
+                  103,
+                  95,
+                  116,
+                  114,
+                  97,
+                  110,
+                  115,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              },
+              {
+                "kind": "arg",
+                "path": "transfer_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "refund_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  117,
+                  110,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              },
+              {
+                "kind": "arg",
+                "path": "transfer_hash"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "_user_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "_transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "bool"
         }
       ]
     },
@@ -1575,6 +1907,10 @@
         {
           "name": "disable_hash_validation",
           "type": "bool"
+        },
+        {
+          "name": "refund_enabled",
+          "type": "bool"
         }
       ]
     },
@@ -1717,6 +2053,19 @@
       ]
     },
     {
+      "name": "RefundAccount",
+      "discriminator": [
+        33,
+        196,
+        176,
+        53,
+        44,
+        213,
+        37,
+        99
+      ]
+    },
+    {
       "name": "RelayerSettings",
       "discriminator": [
         163,
@@ -1744,6 +2093,19 @@
     }
   ],
   "events": [
+    {
+      "name": "AddRefundRequestEvent",
+      "discriminator": [
+        193,
+        158,
+        185,
+        78,
+        168,
+        174,
+        161,
+        71
+      ]
+    },
     {
       "name": "ClientCreatedEvent",
       "discriminator": [
@@ -1890,6 +2252,23 @@
   ],
   "types": [
     {
+      "name": "AddRefundRequestEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "transfer_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "Chain",
       "type": {
         "kind": "struct",
@@ -1944,6 +2323,10 @@
           },
           {
             "name": "disable_hash_validation",
+            "type": "bool"
+          },
+          {
+            "name": "refund_enabled",
             "type": "bool"
           },
           {
@@ -2149,6 +2532,10 @@
           {
             "name": "disable_hash_validation",
             "type": "bool"
+          },
+          {
+            "name": "refund_enabled",
+            "type": "bool"
           }
         ]
       }
@@ -2212,12 +2599,7 @@
           },
           {
             "name": "id",
-            "type": {
-              "array": [
-                "u8",
-                16
-              ]
-            }
+            "type": "u128"
           },
           {
             "name": "transfer_hash",
@@ -2250,12 +2632,7 @@
           },
           {
             "name": "tx_id",
-            "type": {
-              "array": [
-                "u8",
-                16
-              ]
-            }
+            "type": "u128"
           },
           {
             "name": "transfer_hash",
@@ -2265,6 +2642,47 @@
                 32
               ]
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RefundAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "is_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "RefundStatus"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RefundStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Canceled"
+          },
+          {
+            "name": "Success"
           }
         ]
       }
@@ -2312,6 +2730,10 @@
           },
           {
             "name": "success_execute",
+            "type": "bool"
+          },
+          {
+            "name": "refunded",
             "type": "bool"
           },
           {

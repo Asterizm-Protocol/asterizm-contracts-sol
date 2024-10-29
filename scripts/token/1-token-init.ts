@@ -75,6 +75,7 @@ const main = async () => {
     const name = response.tokenName;
     const decimals = response.decimals;
     const fee = new BN(response.fee);
+    const refundFee = new BN(response.fee);
 
     if (response.tokenAddress == '0') {
         const clientInit = new InitializeToken(programToken.methods);
@@ -85,7 +86,9 @@ const main = async () => {
             payer!.publicKey,
             true,
             true,
-            fee
+            true,
+            fee,
+            refundFee
         );
 
         return;

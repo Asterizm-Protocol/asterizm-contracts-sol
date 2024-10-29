@@ -28,7 +28,7 @@ describe("Asterizm nft example initialize tests", () => {
   it("Create Client", async () => {
     const init = new InitializeNft(program.methods);
 
-    await init.createClient(nftClientOwner, relayOwner!, true, true);
+    await init.createClient(nftClientOwner, relayOwner!, true, true, true);
   });
 
   it("Create nft example trusted address", async () => {

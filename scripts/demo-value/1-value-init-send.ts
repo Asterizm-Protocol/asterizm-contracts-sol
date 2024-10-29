@@ -29,7 +29,7 @@ const main = async () => {
     {
       type: "number",
       name: "amount",
-      message: "amount",
+      message: "Amount",
       initial: 0,
     },
     {
@@ -41,12 +41,12 @@ const main = async () => {
     {
       type: "text",
       name: "srcAddress",
-      message: "srcAddress (client address)",
+      message: "SRC address (client address)",
     },
     {
       type: "text",
       name: "dstAddress",
-      message: "dstAddress (address on other blockchain side, needed to be in trusted addresses)",
+      message: "DST address (address on other blockchain side, needed to be in trusted addresses)",
     },
     {
       type: "text",

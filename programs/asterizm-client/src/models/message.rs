@@ -12,6 +12,7 @@ use crate::{
 pub const TRANSFER_ACCOUNT_LEN: usize =
   1                                       // success_receive
 + 1                                       // success_execute
++ 1                                       // refunded
 + 1                                       // bump
 ;
 
@@ -20,6 +21,7 @@ pub const TRANSFER_ACCOUNT_LEN: usize =
 pub struct TransferAccount {
     pub success_receive: bool,
     pub success_execute: bool,
+    pub refunded: bool,
     pub bump: u8,
 }
 
@@ -142,7 +144,8 @@ pub struct SendMessage<'info> {
     #[account(
         mut,
         seeds = ["outgoing_transfer".as_bytes(), &user_address.to_bytes(), &transfer_hash],
-        bump = transfer_account.bump
+        bump = transfer_account.bump,
+        constraint = !transfer_account.success_execute && !transfer_account.refunded
     )]
     pub transfer_account: Box<Account<'info, TransferAccount>>,
     /// CHECK: This is not dangerous because we will check it inside the instruction in initializer
@@ -221,7 +224,7 @@ pub struct ResendMessage<'info> {
     #[account(
         seeds = ["outgoing_transfer".as_bytes(), &user_address.to_bytes(), &transfer_hash],
         bump = transfer_account.bump,
-        constraint = transfer_account.success_execute == true
+        constraint = transfer_account.success_execute && !transfer_account.refunded
     )]
     pub transfer_account: Box<Account<'info, TransferAccount>>,
     /// CHECK: This is not dangerous because we will check it inside the instruction in initializer
@@ -339,7 +342,8 @@ pub struct ReceiveMessage<'info> {
     pub trusted_address: Box<Account<'info, ClientTrustedAddress>>,
     #[account(
         seeds = ["incoming_transfer".as_bytes(), &_dst_address.to_bytes(), &transfer_hash],
-        bump = transfer_account.bump
+        bump = transfer_account.bump,
+        constraint = !transfer_account.success_execute && !transfer_account.refunded
     )]
     pub transfer_account: Account<'info, TransferAccount>,
     #[account(

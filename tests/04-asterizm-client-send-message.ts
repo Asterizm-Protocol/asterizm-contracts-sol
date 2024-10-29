@@ -51,7 +51,8 @@ describe("Asterizm client send message tests", () => {
       tokenClientOwner.publicKey,
       relayOwner!,
       true,
-      true
+      true,
+      true,
     );
   });
 

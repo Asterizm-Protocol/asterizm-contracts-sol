@@ -36,7 +36,8 @@ const main = async () => {
         payer!.publicKey,
         relayOwner!,
         true,
-        true
+        true,
+        true,
     );
 };
 main()

@@ -3,12 +3,13 @@ use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 
 use crate::ClientProgramSettings;
 
-pub const CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
+pub const CLIENT_ACCOUNT_LEN: usize = 1   // is_initialized
 + 128                                     // tx_id
 + PUBKEY_BYTES                            // user_address
 + PUBKEY_BYTES                            // relay
 + 1                                       // notify_transfer_sending_result
 + 1                                       // disable_hash_validation
++ 1                                       // refund_enabled
 + 1                                       // bump
 ;
 
@@ -21,6 +22,7 @@ pub struct ClientAccount {
     pub relay_owner: Pubkey,
     pub notify_transfer_sending_result: bool,
     pub disable_hash_validation: bool,
+    pub refund_enabled: bool,
     pub bump: u8,
 }
 
@@ -81,4 +83,5 @@ pub struct ClientUpdatedEvent {
     pub relay_owner: Pubkey,
     pub notify_transfer_sending_result: bool,
     pub disable_hash_validation: bool,
+    pub refund_enabled: bool,
 }

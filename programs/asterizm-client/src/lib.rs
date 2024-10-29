@@ -54,12 +54,14 @@ pub mod asterizm_client {
         relay_owner: Pubkey,
         notify_transfer_sending_result: bool,
         disable_hash_validation: bool,
+        refund_enabled: bool,
     ) -> Result<()> {
         ctx.accounts.client_account.is_initialized = true;
         ctx.accounts.client_account.user_address = user_address;
         ctx.accounts.client_account.relay_owner = relay_owner;
         ctx.accounts.client_account.notify_transfer_sending_result = notify_transfer_sending_result;
         ctx.accounts.client_account.disable_hash_validation = disable_hash_validation;
+        ctx.accounts.client_account.refund_enabled = refund_enabled;
         ctx.accounts.client_account.bump = ctx.bumps.client_account;
 
         emit!(ClientCreatedEvent {
@@ -79,10 +81,12 @@ pub mod asterizm_client {
         relay_owner: Pubkey,
         notify_transfer_sending_result: bool,
         disable_hash_validation: bool,
+        refund_enabled: bool,
     ) -> Result<()> {
         ctx.accounts.client_account.relay_owner = relay_owner;
         ctx.accounts.client_account.notify_transfer_sending_result = notify_transfer_sending_result;
         ctx.accounts.client_account.disable_hash_validation = disable_hash_validation;
+        ctx.accounts.client_account.refund_enabled = refund_enabled;
 
         emit!(ClientUpdatedEvent {
             address: ctx.accounts.client_account.key(),
@@ -90,6 +94,7 @@ pub mod asterizm_client {
             relay_owner,
             notify_transfer_sending_result,
             disable_hash_validation,
+            refund_enabled,
         });
 
         Ok(())
@@ -188,7 +193,7 @@ pub mod asterizm_client {
             build_crosschain_hash(&buffer)
         };
 
-        // Create Settings Account
+        // Find outgoing transfer account
         let (outgoing_transfer_account, outgoing_transfer_bump) = Pubkey::find_program_address(
             &[
                 br"outgoing_transfer",
@@ -226,14 +231,15 @@ pub mod asterizm_client {
             &[outgoing_transfer_account_signer_seeds],
         )?;
 
-        // Init Settings Account
-        let settings_account_data = TransferAccount {
+        // Init Transfer Account
+        let transfer_account_data = TransferAccount {
             success_receive: true,
             success_execute: false,
+            refunded: false,
             bump: outgoing_transfer_bump,
         };
 
-        settings_account_data
+        transfer_account_data
             .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
 
         emit!(InitiateTransferEvent {
@@ -289,6 +295,103 @@ pub mod asterizm_client {
         Ok(())
     }
 
+    pub fn add_refund_request(
+        ctx: Context<AddRefundRequest>,
+        _user_address: Pubkey,
+        transfer_hash: [u8; 32],
+    ) -> Result<()> {
+        ctx.accounts.refund_account.is_initialized = true;
+        ctx.accounts.refund_account.status = RefundStatus::Pending;
+        ctx.accounts.refund_account.bump = ctx.bumps.refund_account;
+
+        emit!(AddRefundRequestEvent { transfer_hash });
+
+        Ok(())
+    }
+
+    pub fn process_refund_request(
+        ctx: Context<ProcessRefundRequest>,
+        _user_address: Pubkey,
+        _transfer_hash: [u8; 32],
+        status: bool,
+    ) -> Result<()> {
+        ctx.accounts.transfer_account.refunded = true;
+
+        ctx.accounts.refund_account.status = if status {
+            RefundStatus::Success
+        } else {
+            RefundStatus::Canceled
+        };
+
+        Ok(())
+    }
+
+    pub fn confirm_incoming_refund(
+        ctx: Context<ConfirmIncomingRefund>,
+        user_address: Pubkey,
+        transfer_hash: [u8; 32],
+    ) -> Result<()> {
+        // Find incoming transfer account
+        let (incoming_transfer_account, incoming_transfer_bump) = Pubkey::find_program_address(
+            &[
+                br"incoming_transfer",
+                &user_address.to_bytes(),
+                &transfer_hash,
+            ],
+            &ID,
+        );
+
+        if incoming_transfer_account != ctx.accounts.transfer_account.key() {
+            return Err(ProgramError::InvalidArgument.into());
+        }
+
+        let incoming_transfer_account_signer_seeds: &[&[_]] = &[
+            br"incoming_transfer",
+            &user_address.to_bytes(),
+            &transfer_hash,
+            &[incoming_transfer_bump],
+        ];
+
+        if ctx.accounts.transfer_account.lamports() == 0 {
+            invoke_signed(
+                &system_instruction::create_account(
+                    &ctx.accounts.authority.key(),
+                    &ctx.accounts.transfer_account.key(),
+                    1.max(ctx.accounts.rent.minimum_balance(TRANSFER_ACCOUNT_LEN + 8)),
+                    (TRANSFER_ACCOUNT_LEN + 8) as u64,
+                    &ID,
+                ),
+                &[
+                    ctx.accounts.authority.to_account_info(),
+                    ctx.accounts.transfer_account.clone(),
+                    ctx.accounts.rent.to_account_info(),
+                    ctx.accounts.system_program.to_account_info(),
+                ],
+                &[incoming_transfer_account_signer_seeds],
+            )?;
+
+            // Init Transfer Account
+            let transfer_account_data = TransferAccount {
+                success_receive: false,
+                success_execute: false,
+                refunded: true,
+                bump: incoming_transfer_bump,
+            };
+
+            transfer_account_data
+                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
+        } else {
+            let mut transfer_account = TransferAccount::try_deserialize(
+                &mut &**ctx.accounts.transfer_account.try_borrow_mut_data()?,
+            )?;
+            transfer_account.refunded = true;
+            transfer_account
+                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
+        }
+
+        Ok(())
+    }
+
     pub fn init_receive_message(
         ctx: Context<InitReceiveMessage>,
         _dst_address: Pubkey,
@@ -328,10 +431,6 @@ pub mod asterizm_client {
         transfer_hash: [u8; 32],
         payload: Vec<u8>,
     ) -> Result<()> {
-        if ctx.accounts.transfer_account.success_execute == true {
-            return Err(ProgramError::AccountAlreadyInitialized.into());
-        }
-
         let message = InitMessage {
             src_chain_id,
             src_address,

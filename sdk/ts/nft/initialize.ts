@@ -16,7 +16,8 @@ export class InitializeNft {
     authority: Keypair,
     relayOwner: PublicKey,
     notifyTransferSendingResult: boolean,
-    disableHashValidation: boolean
+    disableHashValidation: boolean,
+    refund_enabled: boolean,
   ) {
     const nftClientAccount = getNftClientAccountPda(
       NFT_EXAMPLE_PROGRAM_ID,
@@ -34,7 +35,8 @@ export class InitializeNft {
       .createNftClient(
         relayOwner,
         notifyTransferSendingResult,
-        disableHashValidation
+        disableHashValidation,
+        refund_enabled,
       )
       .accountsPartial({
         authority: authority.publicKey,
@@ -50,7 +52,8 @@ export class InitializeNft {
     authority: Keypair,
     relayOwner: PublicKey,
     notifyTransferSendingResult: boolean,
-    disableHashValidation: boolean
+    disableHashValidation: boolean,
+    refund_enabled: boolean,
   ) {
     const nftClientAccount = getNftClientAccountPda(
       NFT_EXAMPLE_PROGRAM_ID,
@@ -68,7 +71,8 @@ export class InitializeNft {
       .updateNftClient(
         relayOwner,
         notifyTransferSendingResult,
-        disableHashValidation
+        disableHashValidation,
+        refund_enabled,
       )
       .accountsPartial({
         authority: authority.publicKey,

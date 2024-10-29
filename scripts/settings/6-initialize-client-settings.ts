@@ -17,7 +17,7 @@ const main = async () => {
         {
             type: "number",
             name: "localChainId",
-            message: "localChainId",
+            message: "Local chain ID",
             initial: 0,
         },
         {

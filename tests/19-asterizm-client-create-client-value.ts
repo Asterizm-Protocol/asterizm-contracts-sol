@@ -33,7 +33,8 @@ describe("Asterizm client create client Value tests", () => {
       valueClientOwner.publicKey,
       relayOwner!,
       true,
-      true
+      true,
+      true,
     );
   });
 

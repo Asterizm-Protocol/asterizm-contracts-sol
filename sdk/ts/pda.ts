@@ -219,3 +219,41 @@ export function getAtaAccountPda(wallet: PublicKey, mint: PublicKey) {
 
     return tokenAccount;
 }
+
+export function getRefundTransferAccountPda(
+  program: PublicKey,
+  user: PublicKey,
+  transferHash: number[],
+) {
+  const userSeed = user.toBuffer();
+  const idSeed = Buffer.from(transferHash);
+  const [relayPda, _relayPdaBump] =
+    anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        userSeed,
+        idSeed,
+        Buffer.from(anchor.utils.bytes.utf8.encode("refund-transfer")),
+      ],
+      program
+    );
+  return relayPda;
+}
+
+export function getRefundAccountPda(
+  program: PublicKey,
+  user: PublicKey,
+  transferHash: number[],
+) {
+  const userSeed = user.toBuffer();
+  const idSeed = Buffer.from(transferHash);
+  const [relayPda, _relayPdaBump] =
+    anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(anchor.utils.bytes.utf8.encode("refund")),
+        userSeed,
+        idSeed,
+      ],
+      program
+    );
+  return relayPda;
+}
