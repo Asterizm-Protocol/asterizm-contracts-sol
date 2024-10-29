@@ -513,6 +513,8 @@ pub struct ProcessRefundRequest<'info> {
     pub refund_transfer_account: Box<Account<'info, RefundTransferAccount>>,
     /// CHECK: This is not dangerous because we will check it inside client
     pub client_refund_account: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we will check it inside client
+    pub client_sender: AccountInfo<'info>,
     pub rent: Sysvar<'info, Rent>,
     pub system_program: Program<'info, System>,
 }
@@ -771,6 +773,7 @@ impl<'a, 'b, 'c, 'info> ProcessRefundRequest<'info> {
             client_account: self.client_account.to_account_info(),
             transfer_account: self.transfer_account.to_account_info(),
             refund_account: self.client_refund_account.clone(),
+            sender: self.client_sender.clone(),
         };
         let cpi_program = self.client_program.to_account_info();
         CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)

@@ -947,6 +947,33 @@
           }
         },
         {
+          "name": "sender",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  110,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              },
+              {
+                "kind": "account",
+                "path": "sender.address",
+                "account": "ClientSender"
+              }
+            ]
+          }
+        },
+        {
           "name": "refund_account",
           "writable": true,
           "pda": {

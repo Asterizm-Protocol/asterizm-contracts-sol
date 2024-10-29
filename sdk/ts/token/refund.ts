@@ -9,6 +9,7 @@ import {
   getOutgoingTransferAccountPda,
   getRefundAccountPda,
   getRefundTransferAccountPda,
+  getSenderAccountPda,
   getTokenClientAccountPda,
 } from "../pda";
 
@@ -143,6 +144,12 @@ export class TokenMessage {
       transferHash
     );
 
+    const clientSender = getSenderAccountPda(
+      CLIENT_PROGRAM_ID,
+      tokenClientAccount,
+      authority.publicKey
+    );
+    
     await this.programAPI
       .processRefundRequest(name, transferHash, status)
       .accountsPartial({
@@ -154,6 +161,7 @@ export class TokenMessage {
         tokenAccount: toAta,
         tokenClientAccount,
         clientRefundAccount,
+        clientSender,
       })
       .signers([authority])
       .rpc();
@@ -187,6 +195,12 @@ export class TokenMessage {
       transferHash
     );
 
+    const clientSender = getSenderAccountPda(
+      CLIENT_PROGRAM_ID,
+      tokenClientAccount,
+      authority.publicKey
+    );
+
     return this.programAPI
       .processRefundRequest(name, transferHash, status)
       .accountsPartial({
@@ -198,6 +212,7 @@ export class TokenMessage {
         tokenAccount: toAta,
         tokenClientAccount,
         clientRefundAccount,
+        clientSender,
       })
       .signers([authority])
       .instruction();

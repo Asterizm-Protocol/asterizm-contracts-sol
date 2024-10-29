@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use super::{ClientAccount, TransferAccount};
+use super::{ClientAccount, ClientSender, TransferAccount};
 
 pub const REFUND_ACCOUNT_LEN: usize = 1   // is_initialized
 + 1                                       // status
@@ -81,6 +81,12 @@ pub struct ProcessRefundRequest<'info> {
         constraint = !transfer_account.success_execute && !transfer_account.refunded
     )]
     pub transfer_account: Box<Account<'info, TransferAccount>>,
+    #[account(
+        seeds = ["sender".as_bytes(), &user_address.to_bytes(), &sender.address.to_bytes()],
+        bump = sender.bump,
+        constraint = authority.key() == sender.address
+    )]
+    pub sender: Box<Account<'info, ClientSender>>,
     #[account(mut,
         seeds = ["refund".as_bytes(), &user_address.to_bytes(), &transfer_hash],
         bump = refund_account.bump,
