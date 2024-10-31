@@ -911,6 +911,7 @@
         },
         {
           "name": "transfer_account",
+          "writable": true,
           "pda": {
             "seeds": [
               {

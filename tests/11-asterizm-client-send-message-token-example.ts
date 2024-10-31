@@ -22,7 +22,7 @@ describe("Asterizm client send message for token example tests", () => {
   let relayerSettingsPda: null | PublicKey = null;
   let localChainId: null | BN = null;
   const chainId = new BN(1);
-  const amount = new BN(999);
+  const amount = new BN(998);
   const value = new BN(999);
   const name = "asterizm";
 

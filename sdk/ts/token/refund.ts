@@ -13,7 +13,7 @@ import {
   getTokenClientAccountPda,
 } from "../pda";
 
-export class TokenMessage {
+export class Refund {
   constructor(private readonly programAPI: ITokenExampleProgramAPI) {}
 
   async addRefundRequest(
@@ -63,7 +63,7 @@ export class TokenMessage {
         clientRefundAccount,
       })
       .signers([signer])
-      .rpc();
+      .rpc({skipPreflight: true});
   }
 
   async addRefundRequestInstruction(
@@ -117,20 +117,22 @@ export class TokenMessage {
   }
 
   async processRefundRequest(
-    authority: Keypair,
+    sender: Keypair,
+    authority: PublicKey,
     name: string,
     transferHash: number[],
     status: boolean,
     mint: PublicKey,
-    clientAccountPda: PublicKey,
     to: PublicKey,
     toAta: PublicKey
   ) {
     const tokenClientAccount = getTokenClientAccountPda(
       TOKEN_EXAMPLE_PROGRAM_ID,
-      authority.publicKey,
+      authority,
       name
     );
+
+    const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, tokenClientAccount);
 
     const transferAccount = getOutgoingTransferAccountPda(
       CLIENT_PROGRAM_ID,
@@ -147,13 +149,14 @@ export class TokenMessage {
     const clientSender = getSenderAccountPda(
       CLIENT_PROGRAM_ID,
       tokenClientAccount,
-      authority.publicKey
+      authority
     );
-    
+
     await this.programAPI
       .processRefundRequest(name, transferHash, status)
       .accountsPartial({
-        signer: authority.publicKey,
+        signer: sender.publicKey,
+        tokenAuthority: authority,
         transferAccount,
         clientAccount: clientAccountPda,
         mint,
@@ -163,25 +166,27 @@ export class TokenMessage {
         clientRefundAccount,
         clientSender,
       })
-      .signers([authority])
+      .signers([sender])
       .rpc();
   }
 
   async processRefundRequestInstruction(
-    authority: Keypair,
+    sender: Keypair,
+    authority: PublicKey,
     name: string,
     transferHash: number[],
     status: boolean,
     mint: PublicKey,
-    clientAccountPda: PublicKey,
     to: PublicKey,
     toAta: PublicKey
   ): Promise<TransactionInstruction> {
     const tokenClientAccount = getTokenClientAccountPda(
       TOKEN_EXAMPLE_PROGRAM_ID,
-      authority.publicKey,
+      authority,
       name
     );
+
+    const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, tokenClientAccount);
 
     const transferAccount = getOutgoingTransferAccountPda(
       CLIENT_PROGRAM_ID,
@@ -198,13 +203,14 @@ export class TokenMessage {
     const clientSender = getSenderAccountPda(
       CLIENT_PROGRAM_ID,
       tokenClientAccount,
-      authority.publicKey
+      authority
     );
 
     return this.programAPI
       .processRefundRequest(name, transferHash, status)
       .accountsPartial({
-        signer: authority.publicKey,
+        signer: sender.publicKey,
+        tokenAuthority: authority,
         transferAccount,
         clientAccount: clientAccountPda,
         mint,
@@ -214,7 +220,7 @@ export class TokenMessage {
         clientRefundAccount,
         clientSender,
       })
-      .signers([authority])
+      .signers([sender])
       .instruction();
   }
 }

@@ -20,15 +20,14 @@ import {
 import {ComputeBudgetProgram, sendAndConfirmRawTransaction, Transaction} from "@solana/web3.js";
 import {getPayerFromConfig} from "../../tests/utils/testing";
 import prompts from "prompts";
-import {ClientMessage} from "../../sdk/ts/client/message";
 import {AsterizmRelayer} from "../../target/types/asterizm_relayer";
-import {RelayMessage} from "../../sdk/ts/relayer/message";
 import {TokenMessage} from "../../sdk/ts/token/message";
 import {AsterizmTokenExample} from "../../target/types/asterizm_token_example";
 import {getOrCreateAssociatedTokenAccount} from "@solana/spl-token";
 import {serializePayloadEthers} from "../../sdk/ts/payload-serializer-ethers";
 import {sha256} from "js-sha256";
 import {serializeMessagePayloadEthers} from "../../sdk/ts/message-payload-serializer-ethers";
+import { Refund } from "../../sdk/ts/token/refund";
 
 const main = async () => {
     const payer = await getPayerFromConfig();
@@ -38,19 +37,19 @@ const main = async () => {
             type: "number",
             name: "dstChainId",
             message: "DST chain id",
-            initial: 50001,
+            initial: 11155111,
         },
         {
             type: "number",
             name: "amount",
             message: "Tokens amount for transfer to destination chain",
-            initial: 1000000000,
+            initial: 10,
         },
         {
             type: "text",
             name: "tokenName",
             message: "Token name",
-            initial: 'AsterizmToken',
+            initial: 'AsterizmToken3',
         },
         {
             type: "text",
@@ -62,13 +61,13 @@ const main = async () => {
             type: "text",
             name: "srcAddress",
             message: "srcAddress (client address)",
-            initial: "Ab7yDn45BrURbc81GmCtd1bggEfR6p5Qn4TSM6tT6Cfk",
+            initial: "3hQD997qouSMx2TMPNGQCZk4NE3yEksCi3v4A9S2Nyjh",
         },
         {
             type: "text",
             name: "dstAddress",
             message: "dstAddress (address on other blockchain side, needed to be in trusted addresses)",
-            initial: "Ab7yDn45BrURbc81GmCtd1bggEfR6p5Qn4TSM6tT6Cfk",
+            initial: "1111111111114MaFcXR65rueYpZ3fvikn5V2JEi7",
         },
         {
             type: "number",
@@ -90,7 +89,6 @@ const main = async () => {
     anchor.setProvider(provider);
 
     const programInternalClient = anchor.workspace.AsterizmClient as Program<AsterizmClient>;
-    const programClient = anchor.workspace.AsterizmClient as Program<AsterizmClient>;
     const programRelay = anchor.workspace.AsterizmRelayer as Program<AsterizmRelayer>;
     const programToken = anchor.workspace.AsterizmTokenExample as Program<AsterizmTokenExample>;
 
@@ -116,19 +114,9 @@ const main = async () => {
         srcAddress,
         dstChainId
     );
-    const dstTrustedAddressPda = getTrustedAccountPda(
-        CLIENT_PROGRAM_ID,
-        dstAddress,
-        srcChainId
-    );
-
-
-
-
-
     const mintPda = getMintPda(
         TOKEN_EXAMPLE_PROGRAM_ID,
-        payer!.publicKey,
+        targetAddress,
         response.tokenName
     );
 
@@ -139,9 +127,8 @@ const main = async () => {
         payer!.publicKey
     ).then((ac) => ac.address);
 
-
     const payload = serializeMessagePayloadEthers({
-        to: payer!.publicKey,
+        to: targetAddress,
         amount,
         txId,
     });
@@ -157,7 +144,7 @@ const main = async () => {
 
     const sendTokenInstruction = await (new TokenMessage(programToken.methods)).sendInstruction(
         payer!,
-        payer!.publicKey,
+        targetAddress,
         dstChainId,
         targetAddress,
         amount,
@@ -183,152 +170,32 @@ const main = async () => {
         commitment: "confirmed",
     });
 
-    let sendTransferHash, sendPayload;
+    let sendTransferHash;
     let ClientEventParser = new EventParser(programInternalClient.programId, new BorshCoder(programInternalClient.idl));
     for (let event of ClientEventParser.parseLogs(InitTx!.meta!.logMessages!)) {
         sendTransferHash = event.data.transferHash;
-        sendPayload = event.data.payload;
     }
 
-    const clientInstruction = await (new ClientMessage(programClient.methods)).sendInstruction(
+    await (new Refund(programToken.methods)).addRefundRequest(
         payer!,
-        srcAddress,
-        dstAddress,
-        payer!.publicKey,
-        payer!.publicKey,
-        srcChainId!,
-        dstChainId,
-        txId,
-        sendTransferHash,
-        new BN (response.feeValue)
-    );
-
-    tx = new Transaction();
-    tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }));
-    tx.add(clientInstruction);
-    tx.feePayer = payer.publicKey;
-    latestBlockhash = await provider.connection.getLatestBlockhash();
-    tx.recentBlockhash = latestBlockhash.blockhash;
-    tx.sign(payer);
-
-    const clientTxHash = await sendAndConfirmRawTransaction(provider.connection, tx.serialize(), {
-        commitment: "confirmed",
-    });
-    const clientTx = await anchor.getProvider().connection.getTransaction(clientTxHash, {
-        commitment: "confirmed",
-    });
-
-    let relayValue, relayPayload;
-    let RelayEventParser = new EventParser(programRelay.programId, new BorshCoder(programRelay.idl));
-    for (let event of RelayEventParser.parseLogs(clientTx!.meta!.logMessages!)) {
-        if (event.data.name != 'sendMessageEvent') {
-            continue;
-        }
-
-        relayValue = event.data.value;
-        relayPayload = event.data.payload;
-    }
-
-
-    const clientInstructionResend = await (new ClientMessage(programClient.methods)).resendInstruction(
-        payer!,
-        srcAddress,
-        payer!.publicKey,
-        payer!.publicKey,
-        sendTransferHash,
-        new BN (response.feeValue)
-    );
-
-    tx = new Transaction();
-    tx.add(clientInstructionResend);
-    tx.feePayer = payer.publicKey;
-    latestBlockhash = await provider.connection.getLatestBlockhash();
-    tx.recentBlockhash = latestBlockhash.blockhash;
-    tx.sign(payer);
-    await sendAndConfirmRawTransaction(provider.connection, tx.serialize(), {
-        commitment: "confirmed",
-    });
-
-    const relayInstructions = await (new RelayMessage(programRelay.methods)).transferInstruction(
-        payer!,
-        payer!.publicKey,
-        srcChainId,
-        srcAddress,
-        dstChainId,
-        dstAddress,
-        txId,
-        sendTransferHash,
-        clientAccountPda,
-        dstTrustedAddressPda
-    );
-
-    tx = new Transaction();
-    tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }));
-    tx.add(relayInstructions);
-    tx.feePayer = payer.publicKey;
-    latestBlockhash = await provider.connection.getLatestBlockhash();
-    tx.recentBlockhash = latestBlockhash.blockhash;
-    tx.sign(payer);
-
-    const relayTxHash = await sendAndConfirmRawTransaction(provider.connection, tx.serialize(), {
-        commitment: "confirmed",
-    });
-    const relayTx = await anchor.getProvider().connection.getTransaction(relayTxHash, {
-        commitment: "confirmed",
-    });
-
-    let eventSrcChainId, eventSrcAddress, eventTxId, eventTransferHash;
-    let DstRelayEventParser = new EventParser(programClient.programId, new BorshCoder(programClient.idl));
-    for (let event of DstRelayEventParser.parseLogs(relayTx!.meta!.logMessages!)) {
-        eventSrcChainId = event.data.srcChainId;
-        eventSrcAddress = event.data.srcAddress;
-        eventTxId = event.data.txId;
-        eventTransferHash = event.data.transferHash;
-    }
-
-
-
-    const toAta = await getOrCreateAssociatedTokenAccount(
-        connection,
-        payer!,
-        mintPda,
-        payer!.publicKey
-    ).then((ac) => ac.address);
-    const clientReceiveInstruction = await (new TokenMessage(programToken.methods)).receiveInstruction(
-        payer!,
+        targetAddress,
         response.tokenName,
-        eventTransferHash,
-        srcChainId,
-        srcAddress,
-        txId,
-        Buffer.from(sendPayload),
-        mintPda,
-        clientAccountPda,
-        dstTrustedAddressPda,
-        dstAddress,
-        payer!.publicKey,
-        toAta
+        sendTransferHash
     );
 
-    tx = new Transaction();
-    tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }));
-    tx.add(clientReceiveInstruction);
-    tx.feePayer = payer.publicKey;
-    latestBlockhash = await provider.connection.getLatestBlockhash();
-    tx.recentBlockhash = latestBlockhash.blockhash;
-    tx.sign(payer);
+    // const status = true;
 
-    const clientReceiveTxHash = await sendAndConfirmRawTransaction(provider.connection, tx.serialize(), {
-        commitment: "confirmed",
-    });
-    const clientReceiveTx = await anchor.getProvider().connection.getTransaction(clientReceiveTxHash, {
-        commitment: "confirmed",
-    });
+    // await (new Refund(programToken.methods)).processRefundRequest(
+    //     payer!,
+    //     response.tokenName,
+    //     sendTransferHash,
+    //     status,
+    //     mintPda,
+    //     clientAccountPda,
+    //     payer!.publicKey,
+    //     fromAccount,
+    // );
 
-    let DstClientEventParser = new EventParser(programClient.programId, new BorshCoder(programClient.idl));
-    for (let event of DstClientEventParser.parseLogs(clientReceiveTx!.meta!.logMessages!)) {
-        console.log(event);
-    }
 };
 main()
     .then(() => process.exit(0))

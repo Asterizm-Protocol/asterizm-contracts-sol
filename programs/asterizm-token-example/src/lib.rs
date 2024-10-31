@@ -355,7 +355,7 @@ pub struct SendMessage<'info> {
     #[account(
         init,
         payer = signer,
-        space = 8 + TOKEN_CLIENT_ACCOUNT_LEN,
+        space = 8 + REFUND_TRANSFER_ACCOUNT_LEN,
         seeds = [token_authority.key().as_ref(), &transfer_hash, b"refund-transfer"],
         bump
     )]
@@ -466,6 +466,7 @@ pub struct AddRefundRequest<'info> {
         constraint = refund_transfer_account.user_address == signer.key()
     )]
     pub refund_transfer_account: Box<Account<'info, RefundTransferAccount>>,
+    #[account(mut)]
     /// CHECK: This is not dangerous because we will check it inside client
     pub client_refund_account: AccountInfo<'info>,
     pub rent: Sysvar<'info, Rent>,
@@ -473,7 +474,7 @@ pub struct AddRefundRequest<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(_name: String, _transfer_hash: [u8; 32],)]
+#[instruction(_name: String, transfer_hash: [u8; 32],)]
 pub struct ProcessRefundRequest<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -500,24 +501,26 @@ pub struct ProcessRefundRequest<'info> {
     /// CHECK: This is not dangerous because we will check it inside client
     pub client_account: Box<Account<'info, ClientAccount>>,
     #[account(mut,
-        seeds = ["outgoing_transfer".as_bytes(), &token_client_account.key().as_ref(), &_transfer_hash],
+        seeds = ["outgoing_transfer".as_bytes(), &token_client_account.key().as_ref(), &transfer_hash],
         bump = transfer_account.bump,
         seeds::program = client_program.key()
     )]
     pub transfer_account: Account<'info, TransferAccount>,
     #[account(
-        seeds = [token_authority.key().as_ref(), &_transfer_hash, b"refund-transfer"],
+        seeds = [token_authority.key().as_ref(), &transfer_hash, b"refund-transfer"],
         bump = refund_transfer_account.bump,
         constraint = refund_transfer_account.user_address == to.key() && refund_transfer_account.token_address == token_account.key()
     )]
     pub refund_transfer_account: Box<Account<'info, RefundTransferAccount>>,
     /// CHECK: This is not dangerous because we will check it inside client
+    #[account(mut)]
     pub client_refund_account: AccountInfo<'info>,
     /// CHECK: This is not dangerous because we will check it inside client
     pub client_sender: AccountInfo<'info>,
     pub rent: Sysvar<'info, Rent>,
     pub system_program: Program<'info, System>,
 }
+
 
 #[derive(Accounts)]
 #[instruction(_name: String)]
@@ -769,7 +772,7 @@ impl<'a, 'b, 'c, 'info> ProcessRefundRequest<'info> {
     ) -> CpiContext<'a, 'b, 'c, 'info, asterizm_client::cpi::accounts::ProcessRefundRequest<'info>>
     {
         let cpi_accounts = asterizm_client::cpi::accounts::ProcessRefundRequest {
-            authority: self.token_client_account.to_account_info(),
+            authority: self.signer.to_account_info(),
             client_account: self.client_account.to_account_info(),
             transfer_account: self.transfer_account.to_account_info(),
             refund_account: self.client_refund_account.clone(),

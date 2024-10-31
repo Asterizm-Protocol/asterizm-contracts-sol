@@ -29,7 +29,7 @@ describe("Asterizm token example init send message tests", () => {
   let payer: null | Keypair = null;
   const chainId = new BN(1);
   const name = "asterizm";
-  const amount = new BN(999);
+  const amount = new BN(998);
   const localChainId = new BN(1000);
 
   before(async () => {
@@ -103,6 +103,6 @@ describe("Asterizm token example init send message tests", () => {
 
     const from_balance = await getTokenAccountBalance(from);
 
-    assert.ok(from_balance == "0");
+    assert.ok(from_balance == "1");
   });
 });
