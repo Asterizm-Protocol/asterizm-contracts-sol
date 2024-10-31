@@ -78,7 +78,7 @@ pub struct ProcessRefundRequest<'info> {
     #[account(mut,
         seeds = ["outgoing_transfer".as_bytes(), &user_address.to_bytes(), &transfer_hash],
         bump = transfer_account.bump,
-        constraint = !transfer_account.success_execute && !transfer_account.refunded
+        constraint = !transfer_account.refunded
     )]
     pub transfer_account: Box<Account<'info, TransferAccount>>,
     #[account(
