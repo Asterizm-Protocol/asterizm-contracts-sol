@@ -192,6 +192,7 @@ pub struct InitTransferMessage<'info> {
     )]
     /// CHECK: This is not dangerous because we will check it in constraint
     pub blocked_dst_account: AccountInfo<'info>,
+    pub rent: Sysvar<'info, Rent>,
     pub system_program: Program<'info, System>,
     pub client_program: Program<'info, AsterizmClient>,
     /// CHECK: This is not dangerous because we will check it in client program
@@ -219,6 +220,7 @@ impl<'a, 'b, 'c, 'info> From<&mut InitTransferMessage<'info>>
             trusted_address: accounts.trusted_address.clone(),
             transfer_account: accounts.client_transfer_account.clone(),
             system_program: accounts.system_program.to_account_info(),
+            rent: accounts.rent.to_account_info(),
             instruction_sysvar_account: accounts.instruction_sysvar_account.clone(),
         };
         let cpi_program = accounts.client_program.to_account_info();

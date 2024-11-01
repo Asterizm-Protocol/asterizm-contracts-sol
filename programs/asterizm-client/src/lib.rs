@@ -394,7 +394,7 @@ pub mod asterizm_client {
 
     pub fn init_receive_message(
         ctx: Context<InitReceiveMessage>,
-        _dst_address: Pubkey,
+        dst_address: Pubkey,
         src_address: Pubkey,
         src_chain_id: u64,
         tx_id: u128,
@@ -409,8 +409,63 @@ pub mod asterizm_client {
             return Err(ProgramError::IncorrectProgramId.into());
         }
 
-        ctx.accounts.transfer_account.success_receive = true;
-        ctx.accounts.transfer_account.bump = ctx.bumps.transfer_account;
+        // Find incoming transfer account
+        let (incoming_transfer_account, incoming_transfer_bump) = Pubkey::find_program_address(
+            &[
+                br"incoming_transfer",
+                &dst_address.to_bytes(),
+                &transfer_hash,
+            ],
+            &ID,
+        );
+
+        if incoming_transfer_account != ctx.accounts.transfer_account.key() {
+            return Err(ProgramError::InvalidArgument.into());
+        }
+
+        let incoming_transfer_account_signer_seeds: &[&[_]] = &[
+            br"incoming_transfer",
+            &dst_address.to_bytes(),
+            &transfer_hash,
+            &[incoming_transfer_bump],
+        ];
+
+        if ctx.accounts.transfer_account.lamports() == 0 {
+            invoke_signed(
+                &system_instruction::create_account(
+                    &ctx.accounts.authority.key(),
+                    &ctx.accounts.transfer_account.key(),
+                    1.max(ctx.accounts.rent.minimum_balance(TRANSFER_ACCOUNT_LEN + 8)),
+                    (TRANSFER_ACCOUNT_LEN + 8) as u64,
+                    &ID,
+                ),
+                &[
+                    ctx.accounts.authority.to_account_info(),
+                    ctx.accounts.transfer_account.clone(),
+                    ctx.accounts.rent.to_account_info(),
+                    ctx.accounts.system_program.to_account_info(),
+                ],
+                &[incoming_transfer_account_signer_seeds],
+            )?;
+
+            // Init Transfer Account
+            let transfer_account_data = TransferAccount {
+                success_receive: true,
+                success_execute: false,
+                refunded: false,
+                bump: incoming_transfer_bump,
+            };
+
+            transfer_account_data
+                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
+        } else {
+            let mut transfer_account = TransferAccount::try_deserialize(
+                &mut &**ctx.accounts.transfer_account.try_borrow_mut_data()?,
+            )?;
+            transfer_account.success_receive = true;
+            transfer_account
+                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
+        }
 
         emit!(PayloadReceivedEvent {
             src_chain_id,

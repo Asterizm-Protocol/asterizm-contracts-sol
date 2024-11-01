@@ -186,6 +186,33 @@
           "writable": true
         },
         {
+          "name": "sender",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  110,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              },
+              {
+                "kind": "account",
+                "path": "sender.address",
+                "account": "ClientSender"
+              }
+            ]
+          }
+        },
+        {
           "name": "rent",
           "address": "SysvarRent111111111111111111111111111111111"
         },
@@ -533,7 +560,7 @@
               },
               {
                 "kind": "arg",
-                "path": "_dst_address"
+                "path": "dst_address"
               }
             ]
           }
@@ -564,7 +591,7 @@
               },
               {
                 "kind": "arg",
-                "path": "_dst_address"
+                "path": "dst_address"
               },
               {
                 "kind": "arg",
@@ -575,45 +602,15 @@
         },
         {
           "name": "transfer_account",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  105,
-                  110,
-                  99,
-                  111,
-                  109,
-                  105,
-                  110,
-                  103,
-                  95,
-                  116,
-                  114,
-                  97,
-                  110,
-                  115,
-                  102,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "_dst_address"
-              },
-              {
-                "kind": "arg",
-                "path": "transfer_hash"
-              }
-            ]
-          }
+          "writable": true
         },
         {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
         },
         {
           "name": "instruction_sysvar_account",
@@ -622,7 +619,7 @@
       ],
       "args": [
         {
-          "name": "_dst_address",
+          "name": "dst_address",
           "type": "pubkey"
         },
         {

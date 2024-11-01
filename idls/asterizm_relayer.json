@@ -616,6 +616,10 @@
           "address": "11111111111111111111111111111111"
         },
         {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
           "name": "dst_account",
           "writable": true
         },

@@ -119,6 +119,7 @@ pub struct TransferMessage<'info> {
     ]
     pub initializer_settings_account: Account<'info, InitializerSettings>,
     pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
     /// CHECK: This is not dangerous because we will check it in initializer
     #[account(mut)]
     pub dst_account: AccountInfo<'info>,
@@ -157,6 +158,7 @@ impl<'a, 'b, 'c, 'info> From<&mut TransferMessage<'info>>
             blocked_src_account: accounts.blocked_src_account.clone(),
             blocked_dst_account: accounts.blocked_dst_account.clone(),
             system_program: accounts.system_program.to_account_info(),
+            rent: accounts.rent.to_account_info(),
             client_program: accounts.client_program.to_account_info(),
             client_account: accounts.client_account.clone(),
             trusted_address: accounts.trusted_address.to_account_info(),

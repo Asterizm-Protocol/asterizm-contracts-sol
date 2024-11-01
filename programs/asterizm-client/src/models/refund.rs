@@ -103,12 +103,18 @@ pub struct ConfirmIncomingRefund<'info> {
     #[account(
         seeds = ["client".as_bytes(), &user_address.to_bytes()],
         bump = client_account.bump,
-        constraint = client_account.refund_enabled && authority.key() == user_address
+        constraint = client_account.refund_enabled
     )]
     pub client_account: Box<Account<'info, ClientAccount>>,
     #[account(mut)]
     /// CHECK: This is not dangerous because we will create it inside this instruction
     pub transfer_account: AccountInfo<'info>,
+    #[account(
+        seeds = ["sender".as_bytes(), &user_address.to_bytes(), &sender.address.to_bytes()],
+        bump = sender.bump,
+        constraint = authority.key() == sender.address
+    )]
+    pub sender: Box<Account<'info, ClientSender>>,
     pub rent: Sysvar<'info, Rent>,
     pub system_program: Program<'info, System>,
 }

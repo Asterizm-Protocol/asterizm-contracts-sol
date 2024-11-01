@@ -275,31 +275,27 @@ impl<'a, 'b, 'c, 'info> From<&mut ResendMessage<'info>>
 }
 
 #[derive(Accounts)]
-#[instruction(_dst_address: Pubkey, src_address: Pubkey, src_chain_id: u64, _tx_id: u128, transfer_hash: [u8; 32],)]
+#[instruction(dst_address: Pubkey, src_address: Pubkey, src_chain_id: u64, _tx_id: u128, transfer_hash: [u8; 32],)]
 pub struct InitReceiveMessage<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     #[account(
-        seeds = ["client".as_bytes(), &_dst_address.to_bytes()],
+        seeds = ["client".as_bytes(), &dst_address.to_bytes()],
         bump = client_account.bump,
         constraint = authority.key() == client_account.relay_owner
     )]
     pub client_account: Box<Account<'info, ClientAccount>>,
     #[account(
-        seeds = ["trusted_address".as_bytes(), &_dst_address.to_bytes(), &src_chain_id.to_le_bytes()],
+        seeds = ["trusted_address".as_bytes(), &dst_address.to_bytes(), &src_chain_id.to_le_bytes()],
         bump = trusted_address.bump,
         constraint = trusted_address.address == src_address
     )]
     pub trusted_address: Box<Account<'info, ClientTrustedAddress>>,
-    #[account(
-        init,
-        payer = authority,
-        space = 8 + TRANSFER_ACCOUNT_LEN,
-        seeds = ["incoming_transfer".as_bytes(), &_dst_address.to_bytes(), &transfer_hash],
-        bump
-    )]
-    pub transfer_account: Account<'info, TransferAccount>,
+    #[account(mut)]
+    /// CHECK: This is not dangerous because we will create it inside this instruction
+    pub transfer_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
     /// CHECK: account constraints checked in account trait
     #[account(address = sysvar::instructions::id())]
     pub instruction_sysvar_account: AccountInfo<'info>,
