@@ -80,7 +80,7 @@ describe("Asterizm client initialize tests", () => {
   it("Create Client account", async () => {
     const client = new ClientAccount(program.methods);
     await client.create(
-      payer!,
+      clientUserAddress!,
       clientUserAddress.publicKey,
       relayOwner!,
       true,

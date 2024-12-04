@@ -1,6 +1,5 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
-use anchor_lang::system_program::ID as SystemProgramId;
 
 use crate::program::AsterizmRelayer;
 use crate::CHAIN_LEN;
@@ -57,7 +56,7 @@ pub struct UpdateSettings<'info> {
     #[account(constraint = program.programdata_address() == Ok(Some(program_data.key())))]
     pub program: Program<'info, AsterizmRelayer>,
     #[account(
-    constraint = program_data.upgrade_authority_address == Some(authority.key()) || program_data.upgrade_authority_address == Some(SystemProgramId)
+    constraint = program_data.upgrade_authority_address == Some(authority.key())
     || authority.key() == settings_account.manager
     )]
     pub program_data: Account<'info, ProgramData>,

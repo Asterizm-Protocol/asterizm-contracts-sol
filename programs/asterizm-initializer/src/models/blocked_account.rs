@@ -37,6 +37,23 @@ pub struct BlockAccount<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+#[instruction(chain_id: u64, user_address: Pubkey)]
+pub struct UnblockAccount<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+    seeds = ["settings".as_bytes()],
+    bump = settings_account.bump,
+    constraint = authority.key() == settings_account.manager
+    )]
+    pub settings_account: Box<Account<'info, InitializerSettings>>,
+    #[account(mut,
+    seeds = ["blocked".as_bytes(), &chain_id.to_le_bytes(), &user_address.to_bytes()], bump)]
+    pub blocked_account: Box<Account<'info, BlockedAccount>>,
+    pub system_program: Program<'info, System>,
+}
+
 #[event]
 pub struct BlockAccountEvent {
     pub address: Pubkey,

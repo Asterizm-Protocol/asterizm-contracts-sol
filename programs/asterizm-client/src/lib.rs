@@ -352,7 +352,13 @@ pub mod asterizm_client {
             &[incoming_transfer_bump],
         ];
 
-        if ctx.accounts.transfer_account.lamports() == 0 {
+        if let Ok(mut transfer_account) = TransferAccount::try_deserialize(
+            &mut &**ctx.accounts.transfer_account.try_borrow_mut_data()?,
+        ) {
+            transfer_account.refunded = true;
+            transfer_account
+                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
+        } else {
             invoke_signed(
                 &system_instruction::create_account(
                     &ctx.accounts.authority.key(),
@@ -379,13 +385,6 @@ pub mod asterizm_client {
             };
 
             transfer_account_data
-                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
-        } else {
-            let mut transfer_account = TransferAccount::try_deserialize(
-                &mut &**ctx.accounts.transfer_account.try_borrow_mut_data()?,
-            )?;
-            transfer_account.refunded = true;
-            transfer_account
                 .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
         }
 

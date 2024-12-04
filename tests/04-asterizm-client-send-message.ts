@@ -47,7 +47,7 @@ describe("Asterizm client send message tests", () => {
   it("Create local Client account", async () => {
     const client = new ClientAccount(program.methods);
     await client.create(
-      payer!,
+      tokenClientOwner!,
       tokenClientOwner.publicKey,
       relayOwner!,
       true,

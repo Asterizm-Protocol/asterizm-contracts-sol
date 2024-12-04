@@ -29,7 +29,7 @@ describe("Asterizm client create client Value tests", () => {
   it("Create Value Client account", async () => {
     const client = new ClientAccount(program.methods);
     await client.create(
-      payer!,
+      valueClientOwner!,
       valueClientOwner.publicKey,
       relayOwner!,
       true,

@@ -30,6 +30,7 @@ pub struct ClientAccount {
 #[instruction(user_address: Pubkey)]
 pub struct CreateClientAccount<'info> {
     #[account(mut)]
+    pub payer: Signer<'info>,
     pub authority: Signer<'info>,
     #[account(
         seeds = ["settings".as_bytes()],
@@ -38,9 +39,10 @@ pub struct CreateClientAccount<'info> {
     pub settings_account: Box<Account<'info, ClientProgramSettings>>,
     #[account(
         init,
-        payer = authority,
+        payer = payer,
         space = 8 + CLIENT_ACCOUNT_LEN,
         seeds = ["client".as_bytes(), &user_address.to_bytes()],
+        constraint = user_address == authority.key(),
         bump
     )]
     pub client_account: Box<Account<'info, ClientAccount>>,

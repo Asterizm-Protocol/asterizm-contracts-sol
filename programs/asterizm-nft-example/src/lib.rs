@@ -755,7 +755,8 @@ impl<'a, 'b, 'c, 'info> CreateNftClient<'info> {
         seeds: &'a [&'b [&'c [u8]]],
     ) -> CpiContext<'a, 'b, 'c, 'info, asterizm_client::cpi::accounts::CreateClient<'info>> {
         let cpi_accounts = asterizm_client::cpi::accounts::CreateClient {
-            authority: self.authority.to_account_info(),
+            payer: self.authority.to_account_info(),
+            authority: self.nft_client_account.to_account_info(),
             settings_account: self.client_program_settings.to_account_info(),
             client_account: self.client_account.to_account_info(),
             rent: self.rent.to_account_info(),
