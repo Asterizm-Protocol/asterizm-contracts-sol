@@ -52,14 +52,12 @@ pub struct InitSendMessage<'info> {
     pub relayer_program: Program<'info, AsterizmRelayer>,
     pub system_program: Program<'info, System>,
     #[account(
-        constraint = blocked_src_account.lamports() == 0,
         seeds = ["blocked".as_bytes(), &settings_account.local_chain_id.to_le_bytes(), &src_address.to_bytes()],
         bump,
     )]
     /// CHECK: This is not dangerous because we will check it in constraint
     pub blocked_src_account: AccountInfo<'info>,
     #[account(
-        constraint = blocked_dst_account.lamports() == 0,
         seeds = ["blocked".as_bytes(), &dst_chain_id.to_le_bytes(), &dst_address.to_bytes()],
         bump,
     )]
@@ -179,14 +177,12 @@ pub struct InitTransferMessage<'info> {
     )]
     pub transfer_account: Box<Account<'info, TransferAccount>>,
     #[account(
-        constraint = blocked_src_account.lamports() == 0,
         seeds = ["blocked".as_bytes(), &src_chain_id.to_le_bytes(), &src_address.to_bytes()],
         bump,
     )]
     /// CHECK: This is not dangerous because we will check it in constraint
     pub blocked_src_account: AccountInfo<'info>,
     #[account(
-        constraint = blocked_dst_account.lamports() == 0,
         seeds = ["blocked".as_bytes(), &settings_account.local_chain_id.to_le_bytes(), &dst_address.to_bytes()],
         bump,
     )]

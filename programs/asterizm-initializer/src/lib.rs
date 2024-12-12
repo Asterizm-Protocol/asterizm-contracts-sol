@@ -100,6 +100,26 @@ pub mod asterizm_initializer {
             return Err(ProgramError::IncorrectProgramId.into());
         }
 
+        if ctx.accounts.blocked_dst_account.get_lamports() > 0 {
+            if let Ok(blocked_dst_account) = BlockedAccount::try_deserialize(
+                &mut &**ctx.accounts.blocked_dst_account.try_borrow_data()?,
+            ) {
+                if blocked_dst_account.is_blocked {
+                    return Err(ProgramError::InvalidAccountData.into());
+                }
+            }
+        }
+
+        if ctx.accounts.blocked_src_account.get_lamports() > 0 {
+            if let Ok(blocked_src_account) = BlockedAccount::try_deserialize(
+                &mut &**ctx.accounts.blocked_src_account.try_borrow_data()?,
+            ) {
+                if blocked_src_account.is_blocked {
+                    return Err(ProgramError::InvalidAccountData.into());
+                }
+            }
+        }
+
         let mut value = value;
         // make cpi to relayer
         let relay_account_owner = if relay_owner == ctx.accounts.system_relay_account_owner.key() {
@@ -216,6 +236,26 @@ pub mod asterizm_initializer {
         if current_ix.program_id != asterizm_relayer::ID {
             msg!("Only Relayer can call Initializer Init transfer instruction");
             return Err(ProgramError::IncorrectProgramId.into());
+        }
+
+        if ctx.accounts.blocked_dst_account.get_lamports() > 0 {
+            if let Ok(blocked_dst_account) = BlockedAccount::try_deserialize(
+                &mut &**ctx.accounts.blocked_dst_account.try_borrow_data()?,
+            ) {
+                if blocked_dst_account.is_blocked {
+                    return Err(ProgramError::InvalidAccountData.into());
+                }
+            }
+        }
+
+        if ctx.accounts.blocked_src_account.get_lamports() > 0 {
+            if let Ok(blocked_src_account) = BlockedAccount::try_deserialize(
+                &mut &**ctx.accounts.blocked_src_account.try_borrow_data()?,
+            ) {
+                if blocked_src_account.is_blocked {
+                    return Err(ProgramError::InvalidAccountData.into());
+                }
+            }
         }
 
         asterizm_client::cpi::init_receive_message(

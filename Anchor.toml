@@ -4,14 +4,6 @@
 resolution = true
 skip-lint = false
 
-# [programs.localnet]
-# asterizm-client = "8Eeaxq2CnzWQDQok1pEhQif5DwXCokTWG3jozJMdD3pD"
-# asterizm-initializer = "8tZNYAoFLBxUSa7smKhFgtiiW9yYhiJciiqpzLdeHP5p"
-# asterizm-nft-example = "DHHvkhoMmBBBEdyG3iNKdJ3JNCRxcn1Q6CP9ARPpW4pQ"
-# asterizm-token-example = "6oD3DHTrKU9YnpVtrvQJc5NPpwB4P9Mj6aUrrorXPeJa"
-# asterizm-value-example = "2Cs2sRxnN63eqZq8HxfchtB5uARNkYqZ5EyZZ55S8Y57"
-# asterizm_relayer = "AsXCTmPnyFfxYGrymtL4wa56tk2GTBPu2q2nRAktMWyW"
-
 [programs.devnet]
 asterizm-client = "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
 asterizm-initializer = "AsE15Mep8EJundywoGRs2XbKY28HghJ7HZ4b7qN3uiJc"

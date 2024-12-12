@@ -99,6 +99,7 @@ describe("Asterizm nft example receive message tests", () => {
     );
 
     let tx1 = new Transaction();
+    tx1.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }));
     tx1.add(receiveInstruction);
     tx1.feePayer = nftClientOwner.publicKey;
     const latestBlockhash1 = await provider.connection.getLatestBlockhash();
