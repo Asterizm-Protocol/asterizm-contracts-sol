@@ -64,19 +64,12 @@ pub mod asterizm_initializer {
     }
 
     pub fn unblock_account(
-        ctx: Context<UnblockAccount>,
+        _ctx: Context<UnblockAccount>,
         _chain_id: u64,
         _user_address: Pubkey,
     ) -> Result<()> {
-        let cpi_context = CpiContext::new(
-            ctx.accounts.system_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.blocked_account.to_account_info(),
-                to: ctx.accounts.authority.to_account_info(),
-            },
-        );
-        transfer(cpi_context, ctx.accounts.blocked_account.get_lamports())?;
 
+        
         Ok(())
     }
 

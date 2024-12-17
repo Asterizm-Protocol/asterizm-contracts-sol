@@ -49,7 +49,10 @@ pub struct UnblockAccount<'info> {
     )]
     pub settings_account: Box<Account<'info, InitializerSettings>>,
     #[account(mut,
-    seeds = ["blocked".as_bytes(), &chain_id.to_le_bytes(), &user_address.to_bytes()], bump)]
+        close = authority,
+        seeds = ["blocked".as_bytes(), &chain_id.to_le_bytes(), &user_address.to_bytes()], 
+        bump = blocked_account.bump,
+    )]
     pub blocked_account: Box<Account<'info, BlockedAccount>>,
     pub system_program: Program<'info, System>,
 }
