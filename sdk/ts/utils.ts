@@ -3,6 +3,7 @@ import {
   PublicKey,
   Signer,
   Transaction,
+  Keypair,
 } from "@solana/web3.js";
 import {
   createMint,
@@ -41,14 +42,15 @@ export const sendAndConfirmTx = async (
   );
 };
 
-export const createNewMint = (decimals: number, payer: Signer) =>
-  createMint(
-    provider.connection,
-    payer,
-    payer.publicKey,
-    payer.publicKey,
-    decimals
-  );
+export const createNewMint = (decimals: number, payer: Signer, mint: Keypair) =>
+    createMint(
+        provider.connection,
+        payer,
+        payer.publicKey,
+        payer.publicKey,
+        decimals,
+        mint
+    );
 
 export const mintToAta = (
   mintAuthority: Signer,

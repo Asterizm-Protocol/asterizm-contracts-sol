@@ -11,12 +11,13 @@ asterizm-nft-example = "AsGHptNAzEa1UXw4mWRy1WXmBsi11CMaZ2RJ9p6cn1SF"
 asterizm-token-example = "AsUG3qmKKMjEYZDCTqo4hJEnLmxGj82SDGiXci1hNFBx"
 asterizm-value-example = "AsWKK9AMhadUi2GX7BptSCqyhLJBeCXoKbytoF28AuKR"
 asterizm_relayer = "AsXCTmPnyFfxYGrymtL4wa56tk2GTBPu2q2nRAktMWyW"
+asterizm-native-token-example = "AsNXcUZTtBVYRp6D7m2oGa3st9LhDCyDhXtpqjLcqRo2"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

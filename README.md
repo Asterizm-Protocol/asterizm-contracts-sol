@@ -159,8 +159,17 @@ npx ts-node scripts/<..>.ts
 
 ## Problems
 
-1. Fixed "account data too small for instruction"
+#### 1. Fixed "account data too small for instruction"
 
 ```bash
 solana program extend <progrem_id> <more_bytes>
 ```
+
+## Programs
+#### 1. Updating program addresses.
+You must generate new addresses:
+
+```bash
+solana-keygen grind --starts-with As:1
+```
+After that you must update all old addresses in all files and update keypait for all addresses in target/deploy directory

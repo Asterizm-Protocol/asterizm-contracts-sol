@@ -4,6 +4,7 @@ import type { AsterizmRelayer } from "../../target/types/asterizm_relayer";
 import type { AsterizmInitializer } from "../../target/types/asterizm_initializer";
 import type { AsterizmClient } from "../../target/types/asterizm_client";
 import type { AsterizmTokenExample } from "../../target/types/asterizm_token_example";
+import type { AsterizmNativeTokenExample } from "../../target/types/asterizm_native_token_example";
 import type { AsterizmNftExample } from "../../target/types/asterizm_nft_example";
 import type { AsterizmValueExample } from "../../target/types/asterizm_value_example";
 import * as anchor from "@coral-xyz/anchor";
@@ -21,6 +22,10 @@ export const CLIENT_PROGRAM_ID = new PublicKey(
 
 export const TOKEN_EXAMPLE_PROGRAM_ID = new PublicKey(
   "AsUG3qmKKMjEYZDCTqo4hJEnLmxGj82SDGiXci1hNFBx"
+);
+
+export const NATIVE_TOKEN_EXAMPLE_PROGRAM_ID = new PublicKey(
+    "AsNXcUZTtBVYRp6D7m2oGa3st9LhDCyDhXtpqjLcqRo2"
 );
 
 export const NFT_EXAMPLE_PROGRAM_ID = new PublicKey(
@@ -67,5 +72,6 @@ export type IRelayerProgramAPI = IProgram<AsterizmRelayer>["methods"];
 export type IInitializerProgramAPI = IProgram<AsterizmInitializer>["methods"];
 export type IClientProgramAPI = IProgram<AsterizmClient>["methods"];
 export type ITokenExampleProgramAPI = IProgram<AsterizmTokenExample>["methods"];
+export type INativeTokenExampleProgramAPI = IProgram<AsterizmNativeTokenExample>["methods"];
 export type INftExampleProgramAPI = IProgram<AsterizmNftExample>["methods"];
 export type IValueExampleProgramAPI = IProgram<AsterizmValueExample>["methods"];

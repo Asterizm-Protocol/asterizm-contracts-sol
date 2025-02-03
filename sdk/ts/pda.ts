@@ -173,6 +173,25 @@ export function getTokenClientAccountPda(
     );
   return relayPda;
 }
+
+export function getVaultAccountPda(
+    program: PublicKey,
+    userAddress: PublicKey,
+    name: string
+) {
+    const userSeed = userAddress.toBuffer();
+    const [relayPda, _relayPdaBump] =
+        anchor.web3.PublicKey.findProgramAddressSync(
+            [
+                userSeed,
+                Buffer.from(anchor.utils.bytes.utf8.encode(name)),
+                Buffer.from(anchor.utils.bytes.utf8.encode("asterizm-token-vault")),
+            ],
+            program
+        );
+    return relayPda;
+}
+
 export function getNftClientAccountPda(
   program: PublicKey,
   userAddress: PublicKey,

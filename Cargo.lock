@@ -423,6 +423,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "asterizm-native-token-example"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+]
+
+[[package]]
 name = "asterizm-nft-example"
 version = "0.1.0"
 dependencies = [

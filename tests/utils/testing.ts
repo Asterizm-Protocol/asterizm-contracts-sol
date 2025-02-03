@@ -88,6 +88,8 @@ export async function getPayer2FromConfig() {
 }
 
 export const tokenClientOwner = anchor.web3.Keypair.generate();
+export const nativeTokenClientOwner = anchor.web3.Keypair.generate();
+export const nativeTokenMint = anchor.web3.Keypair.generate();
 export const nftClientOwner = anchor.web3.Keypair.generate();
 export const valueClientOwner = anchor.web3.Keypair.generate();
 export const nftMint = anchor.web3.Keypair.generate();
