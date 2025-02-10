@@ -103,7 +103,12 @@ pub fn build_crosschain_hash(_packed: &[u8]) -> [u8; 32] {
     let payload_chunk = &_packed[112..];
     let payload_length = payload_chunk.len();
     let chunk_length = 127;
-    for i in 0..=(payload_length / chunk_length) {
+
+    let mut limit_fix = payload_length / chunk_length;
+    if payload_length % chunk_length == 0 {
+        limit_fix -= 1;
+    }
+    for i in 0..=limit_fix {
         let from = chunk_length * i;
         let to: usize = if from + chunk_length <= payload_length {
             from + chunk_length
