@@ -10,30 +10,30 @@ import type { AsterizmValueExample } from "../../target/types/asterizm_value_exa
 import * as anchor from "@coral-xyz/anchor";
 
 export const RELAYER_PROGRAM_ID = new PublicKey(
-  "AsXCTmPnyFfxYGrymtL4wa56tk2GTBPu2q2nRAktMWyW"
+  "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
 );
 
 export const INITIALIZER_PROGRAM_ID = new PublicKey(
-  "AsE15Mep8EJundywoGRs2XbKY28HghJ7HZ4b7qN3uiJc"
+  "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
 );
 export const CLIENT_PROGRAM_ID = new PublicKey(
-  "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+  "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
 );
 
 export const TOKEN_EXAMPLE_PROGRAM_ID = new PublicKey(
-  "AsUG3qmKKMjEYZDCTqo4hJEnLmxGj82SDGiXci1hNFBx"
+  "ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s"
 );
 
 export const NATIVE_TOKEN_EXAMPLE_PROGRAM_ID = new PublicKey(
-    "AsNXcUZTtBVYRp6D7m2oGa3st9LhDCyDhXtpqjLcqRo2"
+    "ASzKeKfU6HM6NZHdmuQL31uvU1Hw8Foj8y6Myky6Wp47"
 );
 
 export const NFT_EXAMPLE_PROGRAM_ID = new PublicKey(
-  "AsGHptNAzEa1UXw4mWRy1WXmBsi11CMaZ2RJ9p6cn1SF"
+  "ASPAGH1992btTDvmLELAWAAzj9J5tLyaDHdW4qaYxsnG"
 );
 
 export const VALUE_EXAMPLE_PROGRAM_ID = new PublicKey(
-  "AsWKK9AMhadUi2GX7BptSCqyhLJBeCXoKbytoF28AuKR"
+  "ASXrQjsqRT6YsE3xYio4i2LKjbLrGQqG4BQ77VfUsmEV"
 );
 
 export const BPF_UPGRADE_ID = new anchor.web3.PublicKey(

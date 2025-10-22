@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
 
-declare_id!("AsXCTmPnyFfxYGrymtL4wa56tk2GTBPu2q2nRAktMWyW");
+declare_id!("ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk");
 
 declare_program!(asterizm_initializer);
 

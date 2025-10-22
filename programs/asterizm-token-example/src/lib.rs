@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 use anchor_spl::token::*;
 
-declare_id!("AsUG3qmKKMjEYZDCTqo4hJEnLmxGj82SDGiXci1hNFBx");
+declare_id!("ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s");
 
 declare_program!(asterizm_client);
 

@@ -4,7 +4,7 @@ use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 use anchor_spl::token::*;
 use anchor_spl::associated_token::AssociatedToken;
 
-declare_id!("AsNXcUZTtBVYRp6D7m2oGa3st9LhDCyDhXtpqjLcqRo2");
+declare_id!("ASzKeKfU6HM6NZHdmuQL31uvU1Hw8Foj8y6Myky6Wp47");
 
 declare_program!(asterizm_client);
 

@@ -12,7 +12,7 @@ use mpl_token_metadata::{
     types::{Data, PrintSupply, TokenStandard},
 };
 
-declare_id!("AsGHptNAzEa1UXw4mWRy1WXmBsi11CMaZ2RJ9p6cn1SF");
+declare_id!("ASPAGH1992btTDvmLELAWAAzj9J5tLyaDHdW4qaYxsnG");
 
 declare_program!(asterizm_client);
 

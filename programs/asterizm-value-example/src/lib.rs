@@ -1,7 +1,7 @@
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 
-declare_id!("AsWKK9AMhadUi2GX7BptSCqyhLJBeCXoKbytoF28AuKR");
+declare_id!("ASXrQjsqRT6YsE3xYio4i2LKjbLrGQqG4BQ77VfUsmEV");
 
 declare_program!(asterizm_client);
 

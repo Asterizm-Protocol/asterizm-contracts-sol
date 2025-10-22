@@ -1,5 +1,5 @@
 {
-  "address": "AsXCTmPnyFfxYGrymtL4wa56tk2GTBPu2q2nRAktMWyW",
+  "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk",
   "metadata": {
     "name": "asterizm_relayer",
     "version": "0.1.0",
@@ -585,7 +585,7 @@
         },
         {
           "name": "initializer_program",
-          "address": "AsE15Mep8EJundywoGRs2XbKY28HghJ7HZ4b7qN3uiJc"
+          "address": "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
         },
         {
           "name": "initializer_settings_account",
@@ -635,7 +635,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         },
         {
           "name": "client_account"
@@ -725,11 +725,11 @@
         },
         {
           "name": "initializer_program",
-          "address": "AsE15Mep8EJundywoGRs2XbKY28HghJ7HZ4b7qN3uiJc"
+          "address": "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         },
         {
           "name": "client_account"
@@ -952,7 +952,7 @@
         },
         {
           "name": "program",
-          "address": "AsXCTmPnyFfxYGrymtL4wa56tk2GTBPu2q2nRAktMWyW"
+          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
         },
         {
           "name": "program_data"

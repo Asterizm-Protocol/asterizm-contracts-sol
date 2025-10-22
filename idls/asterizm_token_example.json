@@ -1,5 +1,5 @@
 {
-  "address": "AsUG3qmKKMjEYZDCTqo4hJEnLmxGj82SDGiXci1hNFBx",
+  "address": "ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s",
   "metadata": {
     "name": "asterizm_token_example",
     "version": "0.1.0",
@@ -73,7 +73,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         },
         {
           "name": "client_account",
@@ -262,7 +262,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         }
       ],
       "args": [
@@ -353,7 +353,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         }
       ],
       "args": [
@@ -492,7 +492,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         }
       ],
       "args": [
@@ -694,7 +694,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         },
         {
           "name": "client_account"
@@ -889,7 +889,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         },
         {
           "name": "client_settings_account"
@@ -1016,7 +1016,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         }
       ],
       "args": [
@@ -1099,7 +1099,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         }
       ],
       "args": [
@@ -1263,7 +1263,7 @@
         },
         {
           "name": "client_program",
-          "address": "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         },
         {
           "name": "client_settings_account"

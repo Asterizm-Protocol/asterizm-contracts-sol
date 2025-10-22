@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS");
+declare_id!("AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7");
 
 declare_program!(asterizm_initializer);
 
