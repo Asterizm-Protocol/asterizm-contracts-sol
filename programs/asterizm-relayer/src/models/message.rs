@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar;
 
-use crate::asterizm_client::accounts::ClientTrustedAddress;
 use crate::asterizm_client::program::AsterizmClient;
 use crate::asterizm_initializer::accounts::InitializerSettings;
 use crate::asterizm_initializer::program::AsterizmInitializer;
@@ -134,8 +133,6 @@ pub struct TransferMessage<'info> {
     /// CHECK: This is not dangerous because we will check it in client program
     pub client_account: AccountInfo<'info>,
     /// CHECK: This is not dangerous because we will check it in client program
-    pub trusted_address: Account<'info, ClientTrustedAddress>,
-    /// CHECK: This is not dangerous because we will check it in client program
     #[account(mut)]
     pub client_transfer_account: AccountInfo<'info>,
     /// CHECK: account constraints checked in account trait
@@ -161,7 +158,6 @@ impl<'a, 'b, 'c, 'info> From<&mut TransferMessage<'info>>
             rent: accounts.rent.to_account_info(),
             client_program: accounts.client_program.to_account_info(),
             client_account: accounts.client_account.clone(),
-            trusted_address: accounts.trusted_address.to_account_info(),
             client_transfer_account: accounts.client_transfer_account.clone(),
             instruction_sysvar_account: accounts.instruction_sysvar_account.clone(),
         };

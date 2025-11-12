@@ -18,19 +18,19 @@ const main = async () => {
             type: "number",
             name: "chainId",
             message: "Trusted chain ID",
-            initial: 0,
+            initial: 50000,
         },
         {
             type: "text",
             name: "trustedAddress",
-            message: "Trusted address",
+            message: "Trusted address (in uint type)",
             initial: 0,
         },
         {
             type: "text",
             name: "tokenName",
             message: "Token name",
-            initial: 'AsterizmToken1',
+            initial: 'AsterizmToken',
         },
         {
             type: "number",

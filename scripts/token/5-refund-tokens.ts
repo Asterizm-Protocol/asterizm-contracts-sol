@@ -28,6 +28,7 @@ import {serializePayloadEthers} from "../../sdk/ts/payload-serializer-ethers";
 import {sha256} from "js-sha256";
 import {serializeMessagePayloadEthers} from "../../sdk/ts/message-payload-serializer-ethers";
 import { Refund } from "../../sdk/ts/token/refund";
+import { calculateFees, FEE_RATES } from "../../tests/utils/fees";
 
 const main = async () => {
     const payer = await getPayerFromConfig();
@@ -98,7 +99,6 @@ const main = async () => {
     const dstChainId = new BN(response.dstChainId);
     const amount = new BN(response.amount);
     const dstAddress = new PublicKey(response.dstAddress);
-    const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, dstAddress);
 
     const clientAccount = await programInternalClient.account.clientAccount.fetch(
         getClientAccountPda(CLIENT_PROGRAM_ID, srcAddress)
@@ -127,11 +127,18 @@ const main = async () => {
         payer!.publicKey
     ).then((ac) => ac.address);
 
+    const { ownerFee, systemFee, netAmount } = calculateFees(
+        amount,
+        FEE_RATES.OWNER_FEE_RATE,
+        FEE_RATES.SYSTEM_FEE_RATE
+    );
+
     const payload = serializeMessagePayloadEthers({
         to: targetAddress,
-        amount,
+        amount: netAmount,
         txId,
     });
+
     const startedPayloadSerialized = serializePayloadEthers({
         dstAddress,
         dstChainId: dstChainId!,

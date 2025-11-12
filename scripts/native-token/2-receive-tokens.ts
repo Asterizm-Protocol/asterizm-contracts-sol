@@ -130,7 +130,6 @@ const main = async () => {
         txId,
         incomingTransferHash,
         clientAccountPda,
-        trustedAddressPda
     );
 
     const payloadClient = serializeMessagePayloadEthers({

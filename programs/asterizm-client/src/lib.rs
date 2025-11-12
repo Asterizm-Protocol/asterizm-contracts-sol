@@ -13,7 +13,7 @@ pub use models::*;
 #[program]
 pub mod asterizm_client {
     use super::*;
-    use anchor_lang::solana_program::hash::hash;
+    use solana_program::hash::hash;
     use anchor_lang::solana_program::program::invoke_signed;
     use anchor_lang::solana_program::system_instruction;
     use anchor_lang::solana_program::sysvar::instructions::get_instruction_relative;

@@ -194,8 +194,6 @@ pub struct InitTransferMessage<'info> {
     /// CHECK: This is not dangerous because we will check it in client program
     pub client_account: AccountInfo<'info>,
     /// CHECK: This is not dangerous because we will check it in client program
-    pub trusted_address: AccountInfo<'info>,
-    /// CHECK: This is not dangerous because we will check it in client program
     #[account(mut)]
     pub client_transfer_account: AccountInfo<'info>,
     /// CHECK: account constraints checked in account trait
@@ -213,7 +211,6 @@ impl<'a, 'b, 'c, 'info> From<&mut InitTransferMessage<'info>>
         let cpi_accounts = asterizm_client::cpi::accounts::InitReceiveMessage {
             authority: accounts.authority.to_account_info(),
             client_account: accounts.client_account.clone(),
-            trusted_address: accounts.trusted_address.clone(),
             transfer_account: accounts.client_transfer_account.clone(),
             system_program: accounts.system_program.to_account_info(),
             rent: accounts.rent.to_account_info(),

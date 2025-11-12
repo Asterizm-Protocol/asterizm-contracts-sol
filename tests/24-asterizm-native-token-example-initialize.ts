@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AsterizmNativeTokenExample } from "../target/types/asterizm_native_token_example";
-import { getPayerFromConfig, nativeTokenClientOwner, nativeTokenMint } from "./utils/testing";
+import { getPayerFromConfig, nativeTokenClientOwner, nativeTokenMint, trustedUserAddress } from "./utils/testing";
 import {
   createNewMint,
   fundWalletWithSOL,
@@ -25,12 +25,11 @@ describe("Asterizm native token example initialize tests", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace
-    .AsterizmNativeTokenExample as Program<AsterizmNativeTokenExample>;
+      .AsterizmNativeTokenExample as Program<AsterizmNativeTokenExample>;
   const name = "asterizm";
   const amount = new BN(0);
   let relayOwner: null | PublicKey = null;
   let payer: null | Keypair = null;
-  const trustedUserAddress = anchor.web3.Keypair.generate();
   const chainId = new BN(1);
 
   before(async () => {
@@ -45,15 +44,15 @@ describe("Asterizm native token example initialize tests", () => {
     const init = new InitializeToken(program.methods);
 
     await init.createVault(
-      nativeTokenClientOwner,
-      name,
-      relayOwner!,
-      nativeTokenMint.publicKey,
-      true,
-      true,
-      true,
-      new BN(0),
-      new BN(0),
+        nativeTokenClientOwner,
+        name,
+        relayOwner!,
+        nativeTokenMint.publicKey,
+        true,
+        true,
+        true,
+        new BN(0),
+        new BN(0),
     );
   });
 
@@ -68,10 +67,10 @@ describe("Asterizm native token example initialize tests", () => {
 
   it("Fill Vault", async () => {
     const vault  = getVaultAccountPda(
-          NATIVE_TOKEN_EXAMPLE_PROGRAM_ID,
-          nativeTokenClientOwner.publicKey,
-          name
-        );
+        NATIVE_TOKEN_EXAMPLE_PROGRAM_ID,
+        nativeTokenClientOwner.publicKey,
+        name
+    );
 
     await mintToAta(nativeTokenClientOwner, nativeTokenMint.publicKey, vault, 9999);
   });
@@ -79,10 +78,10 @@ describe("Asterizm native token example initialize tests", () => {
   it("Create token example trusted address", async () => {
     const client = new TrustedAddress(program.methods);
     await client.create(
-      nativeTokenClientOwner,
-      name,
-      trustedUserAddress.publicKey,
-      chainId
+        nativeTokenClientOwner,
+        name,
+        trustedUserAddress.publicKey,
+        chainId
     );
   });
 

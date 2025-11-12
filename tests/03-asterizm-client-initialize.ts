@@ -8,7 +8,7 @@ import {
   getSettingsPda,
   getTrustedAccountPda,
 } from "../sdk/ts/pda";
-import { getPayerFromConfig } from "./utils/testing";
+import { getPayerFromConfig, trustedUserAddress } from "./utils/testing";
 import { fundWalletWithSOL } from "../sdk/ts/utils";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
@@ -26,7 +26,6 @@ describe("Asterizm client initialize tests", () => {
   let payer: null | Keypair = null;
   const clientUserAddress = anchor.web3.Keypair.generate();
   const localChainId = new BN(1000);
-  const trustedUserAddress = anchor.web3.Keypair.generate();
   const senderAddress = anchor.web3.Keypair.generate();
   let relayOwner: null | PublicKey = null;
   const chainId = new BN(1);
@@ -48,7 +47,7 @@ describe("Asterizm client initialize tests", () => {
     const init = new InitializeClient(program.methods);
     await init.initialize(payer!, manager.publicKey, localChainId);
     const settings = await program.account.clientProgramSettings.fetch(
-      settingsPda
+        settingsPda
     );
 
     assert.ok(settings.isInitialized == true);
@@ -60,7 +59,7 @@ describe("Asterizm client initialize tests", () => {
     const init = new InitializeClient(program.methods);
     await init.updateSettings(payer!, newManager.publicKey);
     const settings = await program.account.clientProgramSettings.fetch(
-      settingsPda
+        settingsPda
     );
 
     assert.ok(settings.manager.equals(newManager.publicKey));
@@ -71,7 +70,7 @@ describe("Asterizm client initialize tests", () => {
     const init = new InitializeClient(program.methods);
     await init.updateSettings(newManager!, payer!.publicKey);
     const settings = await program.account.clientProgramSettings.fetch(
-      settingsPda
+        settingsPda
     );
 
     assert.ok(settings.manager.equals(payer!.publicKey));
@@ -80,19 +79,19 @@ describe("Asterizm client initialize tests", () => {
   it("Create Client account", async () => {
     const client = new ClientAccount(program.methods);
     await client.create(
-      clientUserAddress!,
-      clientUserAddress.publicKey,
-      relayOwner!,
-      true,
-      true,
-      true,
+        clientUserAddress!,
+        clientUserAddress.publicKey,
+        relayOwner!,
+        true,
+        true,
+        true,
     );
     const clientAccountPda = getClientAccountPda(
-      program.programId,
-      clientUserAddress.publicKey
+        program.programId,
+        clientUserAddress.publicKey
     );
     const clientAccount = await program.account.clientAccount.fetch(
-      clientAccountPda
+        clientAccountPda
     );
 
     assert.ok(clientAccount.isInitialized == true);
@@ -104,20 +103,20 @@ describe("Asterizm client initialize tests", () => {
   it("Update Client account", async () => {
     const client = new ClientAccount(program.methods);
     await client.update(
-      clientUserAddress!,
-      clientUserAddress.publicKey,
-      relayOwner!,
-      false,
-      true,
-      true,
+        clientUserAddress!,
+        clientUserAddress.publicKey,
+        relayOwner!,
+        false,
+        true,
+        true,
     );
 
     const clientAccountPda = getClientAccountPda(
-      program.programId,
-      clientUserAddress.publicKey
+        program.programId,
+        clientUserAddress.publicKey
     );
     const clientAccount = await program.account.clientAccount.fetch(
-      clientAccountPda
+        clientAccountPda
     );
 
     assert.ok(clientAccount.relayOwner.equals(relayOwner!));
@@ -128,18 +127,18 @@ describe("Asterizm client initialize tests", () => {
   it("Create client account trusted address", async () => {
     const client = new TrustedAddress(program.methods);
     await client.create(
-      clientUserAddress,
-      clientUserAddress.publicKey,
-      trustedUserAddress.publicKey,
-      chainId
+        clientUserAddress,
+        clientUserAddress.publicKey,
+        trustedUserAddress.publicKey,
+        chainId
     );
     const trustedAddressPda = getTrustedAccountPda(
-      program.programId,
-      clientUserAddress.publicKey,
-      chainId
+        program.programId,
+        clientUserAddress.publicKey,
+        chainId
     );
     const trustedAddress = await program.account.clientTrustedAddress.fetch(
-      trustedAddressPda
+        trustedAddressPda
     );
 
     assert.ok(trustedAddress.isInitialized == true);
@@ -151,36 +150,36 @@ describe("Asterizm client initialize tests", () => {
   it("Remove Client account trusted address", async () => {
     const client = new TrustedAddress(program.methods);
     await client.remove(
-      clientUserAddress,
-      clientUserAddress.publicKey,
-      chainId
+        clientUserAddress,
+        clientUserAddress.publicKey,
+        chainId
     );
     const trustedAddressPda = getTrustedAccountPda(
-      program.programId,
-      clientUserAddress.publicKey,
-      chainId
+        program.programId,
+        clientUserAddress.publicKey,
+        chainId
     );
     const trustedAddress =
-      await program.account.clientTrustedAddress.fetchNullable(
-        trustedAddressPda
-      );
+        await program.account.clientTrustedAddress.fetchNullable(
+            trustedAddressPda
+        );
     assert.ok(trustedAddress == null);
   });
 
   it("Create client account sender", async () => {
     const client = new ClientSender(program.methods);
     await client.create(
-      clientUserAddress,
-      clientUserAddress.publicKey,
-      trustedUserAddress.publicKey
+        clientUserAddress,
+        clientUserAddress.publicKey,
+        trustedUserAddress.publicKey
     );
     const senderAddressPda = getSenderAccountPda(
-      program.programId,
-      clientUserAddress.publicKey,
-      trustedUserAddress.publicKey
+        program.programId,
+        clientUserAddress.publicKey,
+        trustedUserAddress.publicKey
     );
     const senderAddress = await program.account.clientSender.fetch(
-      senderAddressPda
+        senderAddressPda
     );
 
     assert.ok((senderAddress.isInitialized = true));
@@ -191,19 +190,19 @@ describe("Asterizm client initialize tests", () => {
   it("Remove Client account sender", async () => {
     const client = new ClientSender(program.methods);
     await client.remove(
-      clientUserAddress,
-      clientUserAddress.publicKey,
-      trustedUserAddress.publicKey
+        clientUserAddress,
+        clientUserAddress.publicKey,
+        trustedUserAddress.publicKey
     );
     const senderAddressPda = getSenderAccountPda(
-      program.programId,
-      clientUserAddress.publicKey,
-      trustedUserAddress.publicKey
+        program.programId,
+        clientUserAddress.publicKey,
+        trustedUserAddress.publicKey
     );
     const senderAddress =
-      await program.account.clientTrustedAddress.fetchNullable(
-        senderAddressPda
-      );
+        await program.account.clientTrustedAddress.fetchNullable(
+            senderAddressPda
+        );
     assert.ok(senderAddress == null);
   });
 });

@@ -99,9 +99,6 @@ const main = async () => {
     );
     const dstChainId = relaySettings.localChainId;
 
-
-
-
     let payloadRelay = serializeMessagePayloadEthers({
         to: payer!.publicKey,
         amount,
@@ -130,12 +127,7 @@ const main = async () => {
         txId,
         incomingTransferHash,
         clientAccountPda,
-        trustedAddressPda
     );
-
-
-
-
 
     const payloadClient = serializeMessagePayloadEthers({
         to: payer!.publicKey,

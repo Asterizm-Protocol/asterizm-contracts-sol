@@ -1,22 +1,34 @@
 # Asterizm
 
-Asterizm protocol affords receive and send cross chain transfer of any messages  
-
-## Documentation
-See [DOCS.md](./DOCS.md) or visit [Asterizm Docs](https://docs.asterizm.io/)
+Asterizm protocol affords receive and send cross chain transfer of any messages
 
 ## Settings
 
-Current programs are written with the usage of `Solana` version 1.18.20 and `Anchor` version 0.30.1.
+Current programs are written with the usage of `Solana` version 2.3.0 and `Anchor` version 0.32.1.
 
 ### Installation
 
-`Solana` can be installed by [this link](https://docs.solanalabs.com/cli/install). 
+`Solana` can be installed by [this lint](https://docs.solanalabs.com/cli/install).
 `Anchor` installation docs can be taken from [here](https://www.anchor-lang.com/docs/installation).
+
+#### Upgrade `Solana` and `Anchor`
+
+```bash
+agave-install init 2.3.0
+avm install latest
+avm use latest
+rustup install nightly (if not installed)
+rustup toolchain link solana ~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu (if not installed)
+```
 
 ### Build
 ```bash
 anchor build
+```
+or
+
+```bash
+RUSTFLAGS="-L /usr/lib/x86_64-linux-gnu" anchor build
 ```
 
 ### Run tests
@@ -30,7 +42,7 @@ anchor deploy
 ```
 or
 ```bash
-solana program deploy ./target/deploy/<..>.so
+solana program deploy --program-id ./keys/<program-id>.json ./target/deploy/<..>.so
 ```
 
 ### Upgrade
@@ -77,7 +89,7 @@ How to change network is described [here](https://solana.com/docs/core/clusters)
 
 ### Update `IDL`
 
-In order to work with correct cpi one must update compiled `idl`s with the new ones, copying them from `target` dir to `idls` dir. 
+In order to work with correct cpi one must update compiled `idl`s with the new ones, copying them from `target` dir to `idls` dir.
 
 ## Programs
 
@@ -86,7 +98,7 @@ usage of Asterizm protocol.
 
 ### Relayer
 
-Relayer program can send and receive messages, create custom relayers, take fees. 
+Relayer program can send and receive messages, create custom relayers, take fees.
 
 #### Instructions
 
@@ -97,7 +109,7 @@ Relayer program can send and receive messages, create custom relayers, take fees
 5. Create chain
 6. Create Transfer event
 7. Create Received message
-8. Notify 
+8. Notify
 
 ### Initializer
 
@@ -156,20 +168,3 @@ Scripts folder contains useful scripts to configure `Solana` programs. To run us
 ```bash
 npx ts-node scripts/<..>.ts
 ```
-
-## Problems
-
-#### 1. Fixed "account data too small for instruction"
-
-```bash
-solana program extend <progrem_id> <more_bytes>
-```
-
-## Programs
-#### 1. Updating program addresses.
-You must generate new addresses:
-
-```bash
-solana-keygen grind --starts-with As:1
-```
-After that you must update all old addresses in all files and update keypait for all addresses in target/deploy directory

@@ -641,9 +641,6 @@
           "name": "client_account"
         },
         {
-          "name": "trusted_address"
-        },
-        {
           "name": "client_transfer_account",
           "writable": true
         },
@@ -989,19 +986,6 @@
       ]
     },
     {
-      "name": "ClientTrustedAddress",
-      "discriminator": [
-        225,
-        105,
-        197,
-        233,
-        93,
-        223,
-        5,
-        154
-      ]
-    },
-    {
       "name": "CustomRelayer",
       "discriminator": [
         18,
@@ -1194,34 +1178,6 @@
           {
             "name": "chain_type",
             "type": "u8"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ClientTrustedAddress",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "is_initialized",
-            "type": "bool"
-          },
-          {
-            "name": "user_address",
-            "type": "pubkey"
-          },
-          {
-            "name": "address",
-            "type": "pubkey"
-          },
-          {
-            "name": "chain_id",
-            "type": "u64"
           },
           {
             "name": "bump",

@@ -98,7 +98,7 @@ pub fn serialize_init_message_eth(message: InitMessage) -> Vec<u8> {
 
 pub fn build_crosschain_hash(_packed: &[u8]) -> [u8; 32] {
     let static_chunk = &_packed[..112];
-    let mut hash = anchor_lang::solana_program::hash::hash(static_chunk);
+    let mut hash = solana_program::hash::hash(static_chunk);
 
     let payload_chunk = &_packed[112..];
     let payload_length = payload_chunk.len();
@@ -117,9 +117,9 @@ pub fn build_crosschain_hash(_packed: &[u8]) -> [u8; 32] {
         };
 
         let chunk = &payload_chunk[from..to];
-        let chunk_hash = anchor_lang::solana_program::hash::hash(chunk);
+        let chunk_hash = solana_program::hash::hash(chunk);
         let encoded = [hash.to_bytes(), chunk_hash.to_bytes()].concat();
-        hash = anchor_lang::solana_program::hash::hash(&encoded);
+        hash = solana_program::hash::hash(&encoded);
     }
 
     hash.to_bytes()
@@ -290,12 +290,6 @@ pub struct InitReceiveMessage<'info> {
         constraint = authority.key() == client_account.relay_owner
     )]
     pub client_account: Box<Account<'info, ClientAccount>>,
-    #[account(
-        seeds = ["trusted_address".as_bytes(), &dst_address.to_bytes(), &src_chain_id.to_le_bytes()],
-        bump = trusted_address.bump,
-        constraint = trusted_address.address == src_address
-    )]
-    pub trusted_address: Box<Account<'info, ClientTrustedAddress>>,
     #[account(mut)]
     /// CHECK: This is not dangerous because we will create it inside this instruction
     pub transfer_account: AccountInfo<'info>,
@@ -388,25 +382,54 @@ pub struct TransferSendingResultEvent {
 //     #[test]
 //     pub fn check_hash() {
 //         let message = InitMessage {
-//             src_chain_id: 50001,
-//             src_address: Pubkey::from_str("FsNa7kiksBmmJtyGjo8MyoQx3rHaSAsq8dFviD8L4Xgr").unwrap(),
-//             dst_chain_id: 40001,
-//             dst_address: Pubkey::from_str("DLwV9Chv99EkjL9jHg5WF8ZZmCW1ct9tuujEsnpGDx7r").unwrap(),
-//             tx_id: 33,
-//             payload: hex::decode("1c44a3873f17459db8f96b03b7f20c86ad087b9bade0182fb3f488e469ea25f100000000000000000000000000000000000000000000000000000000b2d05e000000000000000000000000000000000000000000000000000000000000000021").unwrap(),
+//             src_chain_id: 0x1111111111111111,
+//             src_address: Pubkey::from_str("3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3").unwrap(),
+//             dst_chain_id: 0x3333333333333333,
+//             dst_address: Pubkey::from_str("5bV6jUfhDHCQVA1WfKBUnXUsboJgoKgkzkKcxr3joew5").unwrap(),
+//             tx_id: 0x55555555555555555555555555555555,
+//             payload: hex::decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").unwrap(),
 //         };
 
 //         let buffer = serialize_init_message_eth(message);
 //         println!("buffer = 0x{}", hex::encode(&buffer));
+//         // let buffer = [0xaa; 127];
 
 //         let hash = build_crosschain_hash(&buffer);
 //         println!("build_crosschain_hash = 0x{}", hex::encode(hash));
-//         let hash = anchor_lang::solana_program::hash::hash(&buffer);
-//         println!("regular hash = 0x{}", hex::encode(hash));
 
-//         let data = base64::decode("ao2ZtXt6GeRBnAAAAAAAALdn4pW3r+OJESL8qODD9WNrQ4tv6v55oXrRLLMsxqG5IQAAAAAAAAAAAAAAAAAAAADFfmyycLG6PxioflC9vAUilqUg//XNqZ4ogJaFNIVLYAAAABxEo4c/F0WduPlrA7fyDIatCHubreAYL7P0iORp6iXxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALLQXgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQ==").unwrap();
-//         println!("data = 0x{}", hex::encode(&data));
-//         let event = InitiateTransferEvent::try_from_slice(&data[8..]).unwrap();
-//         println!("hash event = 0x{}", hex::encode(event.transfer_hash));
+
+//         let message = InitMessage {
+//             src_chain_id: 0x1111111111111111,
+//             src_address: Pubkey::from_str("3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3").unwrap(),
+//             dst_chain_id: 0x3333333333333333,
+//             dst_address: Pubkey::from_str("5bV6jUfhDHCQVA1WfKBUnXUsboJgoKgkzkKcxr3joew5").unwrap(),
+//             tx_id: 0x55555555555555555555555555555555,
+//             payload: hex::decode("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB").unwrap(),
+//         };
+
+//         let buffer = serialize_init_message_eth(message);
+//         println!("buffer = 0x{}", hex::encode(&buffer));
+//         // let buffer = [0xaa; 127];
+
+//         let hash = build_crosschain_hash(&buffer);
+//         println!("build_crosschain_hash = 0x{}", hex::encode(hash));
+
+//         // let buffer = [0xbb; 126];
+//         // println!(
+//             // "buffer = 0x{}, len = {}",
+//             // hex::encode(&buffer),
+//             // buffer.len()
+//         // );
+
+//         // let hash = build_crosschain_hash(&buffer);
+//         // println!("build_crosschain_hash = 0x{}", hex::encode(hash));
+
+//         // let hash = solana_program::hash::hash(&buffer);
+//         // println!("regular hash = 0x{}", hex::encode(hash));
+
+//         // let data = base64::decode("ao2ZtXt6GeRBnAAAAAAAALdn4pW3r+OJESL8qODD9WNrQ4tv6v55oXrRLLMsxqG5IQAAAAAAAAAAAAAAAAAAAADFfmyycLG6PxioflC9vAUilqUg//XNqZ4ogJaFNIVLYAAAABxEo4c/F0WduPlrA7fyDIatCHubreAYL7P0iORp6iXxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALLQXgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQ==").unwrap();
+//         // println!("data = 0x{}", hex::encode(&data));
+//         // let event = InitiateTransferEvent::try_from_slice(&data[8..]).unwrap();
+//         // println!("hash event = 0x{}", hex::encode(event.transfer_hash));
 //     }
 // }

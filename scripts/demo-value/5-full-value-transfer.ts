@@ -194,7 +194,6 @@ const main = async () => {
         txId,
         transferHash,
         clientAccountPda,
-        trustedAddressPda
     );
 
     tx = new Transaction();

@@ -16,7 +16,7 @@ describe("Asterizm value example init send message tests", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace
-    .AsterizmValueExample as Program<AsterizmValueExample>;
+      .AsterizmValueExample as Program<AsterizmValueExample>;
   const chainId = new BN(1);
   const amount = new BN(999);
   const txId = new BN(0);
@@ -32,13 +32,13 @@ describe("Asterizm value example init send message tests", () => {
     const srcAddress = valueClientOwner.publicKey;
 
     const trustedAddressPda = getTrustedAccountPda(
-      CLIENT_PROGRAM_ID,
-      srcAddress,
-      chainId
+        CLIENT_PROGRAM_ID,
+        srcAddress,
+        chainId
     );
 
     const clientTrustedAddress =
-      await program.account.clientTrustedAddress.fetch(trustedAddressPda);
+        await program.account.clientTrustedAddress.fetch(trustedAddressPda);
 
     const dstAddress = clientTrustedAddress.address;
 

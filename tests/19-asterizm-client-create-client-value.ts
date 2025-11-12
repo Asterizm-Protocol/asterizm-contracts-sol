@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AsterizmClient } from "../target/types/asterizm_client";
-import { getPayerFromConfig, valueClientOwner } from "./utils/testing";
+import { getPayerFromConfig, trustedUserAddress, valueClientOwner } from "./utils/testing";
 import { fundWalletWithSOL } from "../sdk/ts/utils";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { ClientAccount } from "../sdk/ts/client/client_account";
@@ -15,7 +15,6 @@ describe("Asterizm client create client Value tests", () => {
   const program = anchor.workspace.AsterizmClient as Program<AsterizmClient>;
   let payer: null | Keypair = null;
   let relayOwner: null | PublicKey = null;
-  const trustedUserAddress = anchor.web3.Keypair.generate();
   const chainId = new BN(1);
 
   before(async () => {
@@ -29,30 +28,30 @@ describe("Asterizm client create client Value tests", () => {
   it("Create Value Client account", async () => {
     const client = new ClientAccount(program.methods);
     await client.create(
-      valueClientOwner!,
-      valueClientOwner.publicKey,
-      relayOwner!,
-      true,
-      true,
-      true,
+        valueClientOwner!,
+        valueClientOwner.publicKey,
+        relayOwner!,
+        true,
+        true,
+        true,
     );
   });
 
   it("Create Value client account trusted address", async () => {
     const client = new TrustedAddress(program.methods);
     await client.create(
-      valueClientOwner,
-      valueClientOwner.publicKey,
-      trustedUserAddress.publicKey,
-      chainId
+        valueClientOwner,
+        valueClientOwner.publicKey,
+        trustedUserAddress.publicKey,
+        chainId
     );
   });
   it("Create Value client sender", async () => {
     const client = new ClientSender(program.methods);
     await client.create(
-      valueClientOwner,
-      valueClientOwner.publicKey,
-      valueClientOwner.publicKey
+        valueClientOwner,
+        valueClientOwner.publicKey,
+        valueClientOwner.publicKey
     );
   });
 });

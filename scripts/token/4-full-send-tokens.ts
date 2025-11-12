@@ -29,6 +29,7 @@ import {getOrCreateAssociatedTokenAccount} from "@solana/spl-token";
 import {serializePayloadEthers} from "../../sdk/ts/payload-serializer-ethers";
 import {sha256} from "js-sha256";
 import {serializeMessagePayloadEthers} from "../../sdk/ts/message-payload-serializer-ethers";
+import { calculateFees, FEE_RATES } from "../../tests/utils/fees";
 
 const main = async () => {
     const payer = await getPayerFromConfig();
@@ -122,10 +123,6 @@ const main = async () => {
         srcChainId
     );
 
-
-
-
-
     const mintPda = getMintPda(
         TOKEN_EXAMPLE_PROGRAM_ID,
         payer!.publicKey,
@@ -139,10 +136,15 @@ const main = async () => {
         payer!.publicKey
     ).then((ac) => ac.address);
 
+    const { ownerFee, systemFee, netAmount } = calculateFees(
+        amount,
+        FEE_RATES.OWNER_FEE_RATE,
+        FEE_RATES.SYSTEM_FEE_RATE
+    );
 
     const payload = serializeMessagePayloadEthers({
         to: payer!.publicKey,
-        amount,
+        amount: netAmount,
         txId,
     });
     const startedPayloadSerialized = serializePayloadEthers({
@@ -259,7 +261,6 @@ const main = async () => {
         txId,
         sendTransferHash,
         clientAccountPda,
-        dstTrustedAddressPda
     );
 
     tx = new Transaction();
@@ -285,8 +286,6 @@ const main = async () => {
         eventTxId = event.data.txId;
         eventTransferHash = event.data.transferHash;
     }
-
-
 
     const toAta = await getOrCreateAssociatedTokenAccount(
         connection,

@@ -156,6 +156,24 @@ export function getMintPda(
   return relayPda;
 }
 
+export function getMintPdaWithBump(
+    program: PublicKey,
+    userAddress: PublicKey,
+    name: string
+): [PublicKey, number] {
+    const userSeed = userAddress.toBuffer();
+    const [relayPda, relayPdaBump] =
+        anchor.web3.PublicKey.findProgramAddressSync(
+            [
+                userSeed,
+                Buffer.from(anchor.utils.bytes.utf8.encode(name)),
+                Buffer.from(anchor.utils.bytes.utf8.encode("asterizm-token-mint")),
+            ],
+            program
+        );
+    return [relayPda, relayPdaBump];
+}
+
 export function getTokenClientAccountPda(
   program: PublicKey,
   userAddress: PublicKey,

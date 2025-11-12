@@ -253,7 +253,6 @@ const main = async () => {
         txId,
         sendTransferHash,
         clientAccountPda,
-        dstTrustedAddressPda
     );
 
     tx = new Transaction();

@@ -32,21 +32,57 @@ const main = async () => {
             initial: 9,
         },
         {
+            type: "text",
+            name: "metaName",
+            message: "Token metadata name",
+            initial: 'Asterizm Token',
+        },
+        {
+            type: "text",
+            name: "metaSymbol",
+            message: "Token metadata symbol",
+            initial: 'AST',
+        },
+        {
+            type: "text",
+            name: "metaUri",
+            message: "Token metadata URI (example: https://example.com/metadata.json)",
+            initial: '',
+        },
+        {
+            type: "number",
+            name: "ownerFeeRate",
+            message: "Owner fee rate (10000 == 100%)",
+            initial: 10,
+        },
+        {
+            type: "number",
+            name: "systemFeeRate",
+            message: "System fee rate (10000 == 100%)",
+            initial: 10,
+        },
+        {
+            type: "text",
+            name: "systemFeeAddress",
+            message: "System fee address",
+            initial: '3MPcEphc8VTuotbFKbnotg1bYoUTtdinCYFkNPEEUUR6',
+        },
+        {
             type: "number",
             name: "fee",
-            message: "User fee",
+            message: "User fee (user fee in native coins)",
             initial: 0,
         },
         {
             type: "text",
             name: "tokenAddress",
-            message: "Token address",
+            message: "Token address (0 - initialize new token)",
             initial: '0',
         },
         {
             type: "text",
             name: "trustAddress",
-            message: "Trust address",
+            message: "Trust address (not 0 - add trusted address)",
             initial: '0',
         },
         {
@@ -76,6 +112,9 @@ const main = async () => {
     const decimals = response.decimals;
     const fee = new BN(response.fee);
     const refundFee = new BN(response.fee);
+    const ownerFeeRate = new BN(response.ownerFeeRate);
+    const systemFeeRate = new BN(response.systemFeeRate);
+    const systemFeeAddress = new PublicKey(response.systemFeeAddress);
 
     if (response.tokenAddress == '0') {
         const clientInit = new InitializeToken(programToken.methods);
@@ -88,12 +127,22 @@ const main = async () => {
             true,
             true,
             fee,
-            refundFee
+            refundFee,
+            ownerFeeRate,
+            systemFeeRate,
+            systemFeeAddress
+        );
+
+        await clientInit.addMeta(
+            payer!,
+            name,
+            response.metaName,
+            response.metaSymbol,
+            response.metaUri
         );
 
         return;
     }
-
 
     const mintPda = getMintPda(
         TOKEN_EXAMPLE_PROGRAM_ID,
@@ -104,10 +153,21 @@ const main = async () => {
         connection,
         payer!,
         mintPda,
-        payer!.publicKey
+        payer!.publicKey,
+        false,
+        'confirmed',
     ).then((ac) => ac.address);
 
-
+    if (response.tokenAddress != '0') {
+        await getOrCreateAssociatedTokenAccount(
+            connection,
+            payer!,
+            new PublicKey(response.tokenAddress),
+            systemFeeAddress,
+            false,
+            'confirmed',
+        ).then((ac) => ac.address);
+    }
 
     if (response.trustAddress != '0') {
         const relaySettings = await programRelay.account.relayerSettings.fetch(

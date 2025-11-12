@@ -1,8 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AsterizmRelayer } from "../target/types/asterizm_relayer";
-import { getClientAccountPda, getTrustedAccountPda } from "../sdk/ts/pda";
-import {getPayerFromConfig, tokenClientOwner} from "./utils/testing";
+import { getClientAccountPda } from "../sdk/ts/pda";
+import {getPayerFromConfig, tokenClientOwner, trustedUserAddress} from "./utils/testing";
 import { fundWalletWithSOL } from "../sdk/ts/utils";
 import { Keypair } from "@solana/web3.js";
 import BN from "bn.js";
@@ -35,16 +35,7 @@ describe("Asterizm relayer transfer message", () => {
 
     const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, dstAddress);
 
-    const trustedAddressPda = getTrustedAccountPda(
-      CLIENT_PROGRAM_ID,
-      dstAddress,
-      chainId
-    );
-
-    const clientTrustedAddress =
-      await program.account.clientTrustedAddress.fetch(trustedAddressPda);
-
-    const srcAddress = clientTrustedAddress.address;
+    const srcAddress = trustedUserAddress.publicKey;
 
     const payloadSerialized = serializePayloadEthers({
       dstAddress,
@@ -58,16 +49,15 @@ describe("Asterizm relayer transfer message", () => {
     const incomingTransferHash = sha256.array(payloadSerialized);
 
     await message.transfer(
-      payer!,
-      payer!.publicKey,
-      chainId,
-      srcAddress,
-      localChainId,
-      dstAddress,
-      txId,
-      incomingTransferHash,
-      clientAccountPda,
-      trustedAddressPda
+        payer!,
+        payer!.publicKey,
+        chainId,
+        srcAddress,
+        localChainId,
+        dstAddress,
+        txId,
+        incomingTransferHash,
+        clientAccountPda,
     );
   });
 });

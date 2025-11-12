@@ -3,16 +3,18 @@ import { Program } from "@coral-xyz/anchor";
 import { AsterizmTokenExample } from "../target/types/asterizm_token_example";
 import {
   getClientAccountPda,
-  getMintPda, getTokenClientAccountPda,
+  getMintPda,
+  getTokenClientAccountPda,
   getTrustedAccountPda,
 } from "../sdk/ts/pda";
-import { getPayerFromConfig, tokenClientOwner } from "./utils/testing";
+import { getPayerFromConfig, tokenClientOwner, tokenSystemAccount, trustedUserAddress } from "./utils/testing";
 import {
   fundWalletWithSOL,
   getTokenAccountBalance,
   resolveAssociatedTokenAccount,
 } from "../sdk/ts/utils";
 import { Keypair } from "@solana/web3.js";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
 import BN from "bn.js";
 import { CLIENT_PROGRAM_ID, TOKEN_EXAMPLE_PROGRAM_ID } from "../sdk/ts/program";
 import { TokenMessage } from "../sdk/ts/token/message";
@@ -20,12 +22,17 @@ import { serializeMessagePayloadEthers } from "../sdk/ts/message-payload-seriali
 import { serializePayloadEthers } from "../sdk/ts/payload-serializer-ethers";
 import { sha256 } from "js-sha256";
 import assert from "assert";
+import {
+  calculateFees,
+  assertFeeCreditedToAccount,
+  FEE_RATES,
+} from "./utils/fees";
 
 describe("Asterizm token example receive message tests", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace
-    .AsterizmTokenExample as Program<AsterizmTokenExample>;
+      .AsterizmTokenExample as Program<AsterizmTokenExample>;
   let payer: null | Keypair = null;
   const chainId = new BN(1);
   const localChainId = new BN(1000);
@@ -37,6 +44,7 @@ describe("Asterizm token example receive message tests", () => {
     await fundWalletWithSOL(provider.wallet.publicKey);
     payer = await getPayerFromConfig();
     await fundWalletWithSOL(tokenClientOwner.publicKey);
+    await fundWalletWithSOL(tokenSystemAccount.publicKey);
   });
 
   it("Receive Message", async () => {
@@ -49,20 +57,17 @@ describe("Asterizm token example receive message tests", () => {
     const to = payer!.publicKey;
 
     const trustedAddressPda = getTrustedAccountPda(
-      CLIENT_PROGRAM_ID,
-      dstAddress,
-      chainId
+        CLIENT_PROGRAM_ID,
+        dstAddress,
+        chainId
     );
 
-    const clientTrustedAddress =
-      await program.account.clientTrustedAddress.fetch(trustedAddressPda);
-
-    const srcAddress = clientTrustedAddress.address;
+    const srcAddress = trustedUserAddress.publicKey;
 
     const mintPda = getMintPda(
-      TOKEN_EXAMPLE_PROGRAM_ID,
-      tokenClientOwner.publicKey,
-      name
+        TOKEN_EXAMPLE_PROGRAM_ID,
+        tokenClientOwner.publicKey,
+        name
     );
 
     const payload = serializeMessagePayloadEthers({
@@ -85,25 +90,66 @@ describe("Asterizm token example receive message tests", () => {
     const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, dstAddress);
 
     const toAta = await resolveAssociatedTokenAccount(mintPda, payer!);
-
-    await message.receive(
-      tokenClientOwner,
-      name,
-      transferHash,
-      chainId,
-      srcAddress,
-      txId,
-      Buffer.from(payload),
-      mintPda,
-      clientAccountPda,
-      trustedAddressPda,
-      dstAddress,
-      to,
-      toAta
+    const systemTokenAccount = await resolveAssociatedTokenAccount(mintPda, tokenSystemAccount);
+    const ownerTokenAccount = await getAssociatedTokenAddress(
+        mintPda,
+        tokenClientOwner.publicKey
     );
 
-    const to_balance = await getTokenAccountBalance(toAta);
+    // Get balances before receive
+    const recipientBalanceBefore = await getTokenAccountBalance(toAta);
+    const ownerBalanceBefore = await getTokenAccountBalance(ownerTokenAccount);
+    const systemBalanceBefore = await getTokenAccountBalance(
+        systemTokenAccount
+    );
 
-    assert.ok(to_balance == amount.toString());
+    await message.receive(
+        tokenClientOwner,
+        name,
+        transferHash,
+        chainId,
+        srcAddress,
+        txId,
+        Buffer.from(payload),
+        mintPda,
+        clientAccountPda,
+        trustedAddressPda,
+        dstAddress,
+        to,
+        toAta
+    );
+
+    // Get balances after receive
+    const recipientBalanceAfter = await getTokenAccountBalance(toAta);
+    const ownerBalanceAfter = await getTokenAccountBalance(ownerTokenAccount);
+    const systemBalanceAfter = await getTokenAccountBalance(systemTokenAccount);
+
+    // Calculate expected fees on received amount
+    const { ownerFee, systemFee, netAmount } = calculateFees(
+        amount,
+        FEE_RATES.OWNER_FEE_RATE,
+        FEE_RATES.SYSTEM_FEE_RATE
+    );
+
+    // Verify recipient balance: before + netAmount
+    const expectedRecipientBalance = new BN(recipientBalanceBefore).add(
+        netAmount
+    );
+    assert.ok(
+        recipientBalanceAfter === expectedRecipientBalance.toString(),
+        `Recipient balance should be ${expectedRecipientBalance} but got ${recipientBalanceAfter}`
+    );
+
+    // Verify fees were credited
+    assertFeeCreditedToAccount(
+        new BN(ownerBalanceBefore),
+        new BN(ownerBalanceAfter),
+        ownerFee
+    );
+    assertFeeCreditedToAccount(
+        new BN(systemBalanceBefore),
+        new BN(systemBalanceAfter),
+        systemFee
+    );
   });
 });

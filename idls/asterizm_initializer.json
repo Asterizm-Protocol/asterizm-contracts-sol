@@ -244,9 +244,6 @@
           "name": "client_account"
         },
         {
-          "name": "trusted_address"
-        },
-        {
           "name": "client_transfer_account",
           "writable": true
         },
@@ -764,6 +761,88 @@
       ]
     },
     {
+      "name": "unblock_account",
+      "discriminator": [
+        6,
+        27,
+        18,
+        22,
+        208,
+        252,
+        21,
+        71
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "blocked_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  111,
+                  99,
+                  107,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "chain_id"
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_chain_id",
+          "type": "u64"
+        },
+        {
+          "name": "_user_address",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
       "name": "update_settings",
       "discriminator": [
         81,
@@ -804,7 +883,7 @@
         },
         {
           "name": "program",
-          "address": "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
+          "address": "8gcZkpNm81onRUTz9V1kmazE7dPKxcNFtNwZzN5UNtXK"
         },
         {
           "name": "program_data"

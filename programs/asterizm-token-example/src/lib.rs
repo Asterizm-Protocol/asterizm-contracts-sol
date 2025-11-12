@@ -1,7 +1,12 @@
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
+use anchor_spl::metadata::Metadata;
 use anchor_spl::token::*;
+use mpl_token_metadata::{
+    instructions::CreateV1CpiBuilder,
+    types::TokenStandard,
+};
 
 declare_id!("ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s");
 
@@ -23,7 +28,16 @@ mod asterizm_token_example {
         dst_address: Pubkey,
         dst_chain_id: u64,
     ) -> Result<()> {
-        // transfer fee to token authority
+        // Calculate fees
+        let owner_fee = (amount * ctx.accounts.token_client_account.owner_fee_rate) / 10000;
+        let system_fee = (amount * ctx.accounts.token_client_account.system_fee_rate) / 10000;
+        let total_fees = owner_fee.saturating_add(system_fee);
+        if total_fees >= amount {
+            return Err(ProgramError::InvalidInstructionData.into());
+        }
+        let actual_amount = amount - total_fees;
+
+        // transfer SOL fee to token authority
         let fee = ctx.accounts.token_client_account.fee;
         let cpi_context = CpiContext::new(
             ctx.accounts.system_program.to_account_info(),
@@ -42,13 +56,22 @@ mod asterizm_token_example {
         ];
         let signer: &[&[&[u8]]] = &[&seeds[..]];
 
+        // Burn all amount
         burn(ctx.accounts.to_burn_cpi(signer), amount)?;
+
+        // Mint fees to token authority and system
+        if owner_fee > 0 {
+            mint_to(ctx.accounts.to_mint_owner(signer), owner_fee)?;
+        }
+        if system_fee > 0 {
+            mint_to(ctx.accounts.to_mint_system(signer), system_fee)?;
+        }
 
         let tx_id = ctx.accounts.token_client_account.tx_id;
 
         let payload = serialize_message_payload_eth(MessagePayload {
             dst_address,
-            amount,
+            amount: actual_amount,
             tx_id,
         });
 
@@ -63,14 +86,14 @@ mod asterizm_token_example {
         ctx.accounts.token_client_account.tx_id += 1;
 
         ctx.accounts.refund_transfer_account.is_initialized = true;
-        ctx.accounts.refund_transfer_account.amount = amount;
+        ctx.accounts.refund_transfer_account.amount = actual_amount;
         ctx.accounts.refund_transfer_account.user_address = ctx.accounts.signer.key();
         ctx.accounts.refund_transfer_account.token_address = ctx.accounts.from.key();
         ctx.accounts.refund_transfer_account.bump = ctx.bumps.refund_transfer_account;
 
         emit!(AddTransferEvent {
             transfer_hash,
-            amount,
+            amount: actual_amount,
             user_address: ctx.accounts.signer.key(),
             token_address: ctx.accounts.from.key(),
         });
@@ -103,6 +126,11 @@ mod asterizm_token_example {
             payload,
         )?;
 
+        // Calculate fees on received amount
+        let owner_fee = (data.amount * ctx.accounts.token_client_account.owner_fee_rate) / 10000;
+        let system_fee = (data.amount * ctx.accounts.token_client_account.system_fee_rate) / 10000;
+        let actual_mint_amount = data.amount.saturating_sub(owner_fee).saturating_sub(system_fee);
+
         let seeds: &[&[_]] = &[
             &ctx.accounts.token_client_account.authority.to_bytes(),
             _name.as_bytes(),
@@ -111,7 +139,20 @@ mod asterizm_token_example {
         ];
         let signer: &[&[&[u8]]] = &[&seeds[..]];
 
-        mint_to(ctx.accounts.to_mint_cpi(signer), data.amount)
+        // Mint actual amount to recipient
+        if actual_mint_amount > 0 {
+            mint_to(ctx.accounts.to_mint_cpi(signer), actual_mint_amount)?;
+        }
+
+        // Distribute fees
+        if owner_fee > 0 {
+            mint_to(ctx.accounts.to_mint_owner(signer), owner_fee)?;
+        }
+        if system_fee > 0 {
+            mint_to(ctx.accounts.to_mint_system(signer), system_fee)?;
+        }
+
+        Ok(())
     }
 
     pub fn add_refund_request(
@@ -200,11 +241,17 @@ mod asterizm_token_example {
         refund_enabled: bool,
         fee: u64,
         refund_fee: u64,
+        owner_fee_rate: u64,
+        system_fee_rate: u64,
+        system_fee_address: Pubkey,
     ) -> Result<()> {
         ctx.accounts.token_client_account.is_initialized = true;
         ctx.accounts.token_client_account.tx_id = 0;
         ctx.accounts.token_client_account.fee = fee;
         ctx.accounts.token_client_account.refund_fee = refund_fee;
+        ctx.accounts.token_client_account.owner_fee_rate = owner_fee_rate;
+        ctx.accounts.token_client_account.system_fee_rate = system_fee_rate;
+        ctx.accounts.token_client_account.system_fee_address = system_fee_address;
         ctx.accounts.token_client_account.authority = ctx.accounts.authority.key();
         ctx.accounts.token_client_account.bump = ctx.bumps.token_client_account;
 
@@ -326,6 +373,48 @@ mod asterizm_token_example {
 
         Ok(())
     }
+
+    pub fn add_meta(
+        ctx: Context<AddMeta>,
+        _token_name: String,
+        mint_bump: u8,
+        name: String,
+        symbol: String,
+        uri: String,
+    ) -> Result<()> {
+        let token_client_seeds: &[&[_]] = &[
+            &ctx.accounts.token_client_account.authority.to_bytes(),
+            _token_name.as_bytes(),
+            b"asterizm-token-client",
+            &[ctx.accounts.token_client_account.bump],
+        ];
+        let mint_seeds: &[&[_]] = &[
+            &ctx.accounts.token_client_account.authority.to_bytes(),
+            _token_name.as_bytes(),
+            b"asterizm-token-mint",
+            &[mint_bump],
+        ];
+        let signer: &[&[&[u8]]] = &[&token_client_seeds[..], &mint_seeds[..]];
+
+        CreateV1CpiBuilder::new(&ctx.accounts.metadata_program.to_account_info())
+            .metadata(&ctx.accounts.token_metadata.to_account_info())
+            .mint(&ctx.accounts.mint.to_account_info(), true)
+            .decimals(ctx.accounts.mint.decimals)
+            .authority(&ctx.accounts.token_client_account.to_account_info())
+            .payer(&ctx.accounts.authority.to_account_info())
+            .update_authority(&ctx.accounts.token_client_account.to_account_info(), false)
+            .spl_token_program(Some(&ctx.accounts.token_program.to_account_info()))
+            .name(name)
+            .symbol(symbol)
+            .uri(uri)
+            .seller_fee_basis_points(0)
+            .token_standard(TokenStandard::Fungible)
+            .system_program(&ctx.accounts.system_program.to_account_info())
+            .sysvar_instructions(&ctx.accounts.instruction_sysvar_account)
+            .invoke_signed(&signer)?;
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -378,6 +467,18 @@ pub struct SendMessage<'info> {
     pub chain_account: AccountInfo<'info>,
     /// CHECK: This is not dangerous because we will check it inside client
     pub relayer_program: AccountInfo<'info>,
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = token_client_account.authority,
+    )]
+    pub owner_token_account: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = token_client_account.system_fee_address,
+    )]
+    pub system_fee_token_account: Account<'info, TokenAccount>,
 }
 
 #[event]
@@ -559,6 +660,18 @@ pub struct ReceiveMessage<'info> {
     pub chain_account: AccountInfo<'info>,
     /// CHECK: This is not dangerous because we will check it inside client
     pub relayer_program: AccountInfo<'info>,
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = token_client_account.authority,
+    )]
+    pub owner_token_account: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = token_client_account.system_fee_address,
+    )]
+    pub system_fee_token_account: Account<'info, TokenAccount>,
 }
 
 #[derive(Accounts)]
@@ -586,6 +699,9 @@ pub const TOKEN_CLIENT_ACCOUNT_LEN: usize = 1 // is is_initialized
     + 128                                     // tx_id
     + 64                                      // fee
     + 64                                      // refund_fee
+    + 64                                      // owner_fee_rate
+    + 64                                      // system_fee_rate
+    + PUBKEY_BYTES                            // system_fee_address
     + 1                                       // bump
 ;
 
@@ -597,6 +713,9 @@ pub struct TokenClientAccount {
     pub tx_id: u128,
     pub fee: u64,
     pub refund_fee: u64,
+    pub owner_fee_rate: u64,
+    pub system_fee_rate: u64,
+    pub system_fee_address: Pubkey,
     pub bump: u8,
 }
 
@@ -665,6 +784,32 @@ impl<'a, 'b, 'c, 'info> SendMessage<'info> {
         CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
     }
 
+    fn to_mint_owner(
+        &self,
+        seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, MintTo<'info>> {
+        let cpi_accounts = MintTo {
+            authority: self.token_client_account.to_account_info(),
+            to: self.owner_token_account.to_account_info(),
+            mint: self.mint.to_account_info(),
+        };
+        let cpi_program = self.token_program.to_account_info();
+        CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
+    }
+
+    fn to_mint_system(
+        &self,
+        seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, MintTo<'info>> {
+        let cpi_accounts = MintTo {
+            authority: self.token_client_account.to_account_info(),
+            to: self.system_fee_token_account.to_account_info(),
+            mint: self.mint.to_account_info(),
+        };
+        let cpi_program = self.token_program.to_account_info();
+        CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
+    }
+
     fn to_send_message_cpi(
         &self,
         seeds: &'a [&'b [&'c [u8]]],
@@ -714,6 +859,32 @@ impl<'a, 'b, 'c, 'info> ReceiveMessage<'info> {
         let cpi_accounts = MintTo {
             authority: self.token_client_account.to_account_info(),
             to: self.token_account.to_account_info(),
+            mint: self.mint.to_account_info(),
+        };
+        let cpi_program = self.token_program.to_account_info();
+        CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
+    }
+
+    fn to_mint_owner(
+        &self,
+        seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, MintTo<'info>> {
+        let cpi_accounts = MintTo {
+            authority: self.token_client_account.to_account_info(),
+            to: self.owner_token_account.to_account_info(),
+            mint: self.mint.to_account_info(),
+        };
+        let cpi_program = self.token_program.to_account_info();
+        CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
+    }
+
+    fn to_mint_system(
+        &self,
+        seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, MintTo<'info>> {
+        let cpi_accounts = MintTo {
+            authority: self.token_client_account.to_account_info(),
+            to: self.system_fee_token_account.to_account_info(),
             mint: self.mint.to_account_info(),
         };
         let cpi_program = self.token_program.to_account_info();
@@ -950,4 +1121,39 @@ impl<'a, 'b, 'c, 'info> RemoveClientSender<'info> {
         let cpi_program = self.client_program.to_account_info();
         CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
     }
+}
+
+#[derive(Accounts)]
+#[instruction(_token_name: String, mint_bump: u8)]
+pub struct AddMeta<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+        seeds = [&authority.key().as_ref(), _token_name.as_bytes(), b"asterizm-token-client"],
+        bump = token_client_account.bump,
+    )]
+    pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+    #[account(mut,
+        seeds = [&authority.key().as_ref(), _token_name.as_bytes(), b"asterizm-token-mint"],
+        bump = mint_bump,
+    )]
+    pub mint: Account<'info, Mint>,
+    pub metadata_program: Program<'info, Metadata>,
+    #[account(
+        mut,
+        seeds = [
+            b"metadata".as_ref(),
+            metadata_program.key().as_ref(),
+            mint.key().as_ref(),
+        ],
+        bump,
+        seeds::program = metadata_program.key()
+    )]
+    /// CHECK:
+    pub token_metadata: UncheckedAccount<'info>,
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: account constraints checked in account trait
+    #[account(address = sysvar::instructions::id())]
+    pub instruction_sysvar_account: AccountInfo<'info>,
 }

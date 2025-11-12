@@ -108,7 +108,6 @@ const main = async () => {
         txId,
         transferHash,
         clientAccountPda,
-        trustedAddressPda
     );
 };
 main()

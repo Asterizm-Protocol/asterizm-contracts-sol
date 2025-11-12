@@ -32,7 +32,7 @@ describe("Asterizm nft example receive message tests", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace
-    .AsterizmNftExample as Program<AsterizmNftExample>;
+      .AsterizmNftExample as Program<AsterizmNftExample>;
   let payer: null | Keypair = null;
   const chainId = new BN(1);
   const localChainId = new BN(1000);
@@ -50,8 +50,8 @@ describe("Asterizm nft example receive message tests", () => {
   it("Receive Message", async () => {
     const nft = new Nft(program.methods);
     const dstAddress = getNftClientAccountPda(
-      NFT_EXAMPLE_PROGRAM_ID,
-      nftClientOwner.publicKey
+        NFT_EXAMPLE_PROGRAM_ID,
+        nftClientOwner.publicKey
     );
     const to = payer!.publicKey;
     const id = payer!.publicKey.toBuffer();
@@ -78,24 +78,24 @@ describe("Asterizm nft example receive message tests", () => {
     const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, dstAddress);
 
     const trustedAddressPda = getTrustedAccountPda(
-      CLIENT_PROGRAM_ID,
-      dstAddress,
-      chainId
+        CLIENT_PROGRAM_ID,
+        dstAddress,
+        chainId
     );
 
     const receiveInstruction = await nft.receive(
-      nftClientOwner,
-      name,
-      symbol,
-      uri,
-      transferHash,
-      chainId,
-      srcAddress,
-      txId,
-      Buffer.from(payload),
-      clientAccountPda,
-      dstAddress,
-      trustedAddressPda,
+        nftClientOwner,
+        name,
+        symbol,
+        uri,
+        transferHash,
+        chainId,
+        srcAddress,
+        txId,
+        Buffer.from(payload),
+        clientAccountPda,
+        dstAddress,
+        trustedAddressPda,
     );
 
     let tx1 = new Transaction();
@@ -110,16 +110,17 @@ describe("Asterizm nft example receive message tests", () => {
       commitment: "confirmed",
       skipPreflight: true,
     });
-    
+
     const instruction = await nft.create(
-      nftClientOwner,
-      transferHash,
-      dstAddress,
-      to,
-      nftMint
+        nftClientOwner,
+        transferHash,
+        dstAddress,
+        to,
+        nftMint
     );
 
     let tx = new Transaction();
+    tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }));
     tx.add(instruction);
     tx.feePayer = nftClientOwner.publicKey;
     const latestBlockhash = await provider.connection.getLatestBlockhash();
@@ -135,8 +136,8 @@ describe("Asterizm nft example receive message tests", () => {
     const umi = createUmi(provider.connection).use(mplTokenMetadata());
 
     let asset = await fetchDigitalAsset(
-      umi,
-      publicKey(nftMint.publicKey)
+        umi,
+        publicKey(nftMint.publicKey)
     );
 
     assert.ok(uri == asset.metadata.uri);

@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AsterizmClient } from "../target/types/asterizm_client";
-import { getPayerFromConfig, tokenClientOwner } from "./utils/testing";
+import { getPayerFromConfig, tokenClientOwner, trustedUserAddress } from "./utils/testing";
 import { fundWalletWithSOL } from "../sdk/ts/utils";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
@@ -23,7 +23,6 @@ describe("Asterizm client send message tests", () => {
   let relayOwner: null | PublicKey = null;
   let localChainId: null | BN = null;
   let outgoingTransferHash: null | number[] = null;
-  const trustedUserAddress = anchor.web3.Keypair.generate();
   const senderAddress = anchor.web3.Keypair.generate();
   const chainId = new BN(1);
   const txId = new BN(1);
@@ -36,7 +35,7 @@ describe("Asterizm client send message tests", () => {
     await fundWalletWithSOL(tokenClientOwner.publicKey);
     await fundWalletWithSOL(senderAddress.publicKey);
     const settings = await program.account.relayerSettings.fetch(
-      getSettingsPda(RELAYER_PROGRAM_ID)
+        getSettingsPda(RELAYER_PROGRAM_ID)
     );
     systemRelayOwner = settings.systemRelayerOwner;
     relayOwner = payer!.publicKey;
@@ -47,31 +46,31 @@ describe("Asterizm client send message tests", () => {
   it("Create local Client account", async () => {
     const client = new ClientAccount(program.methods);
     await client.create(
-      tokenClientOwner!,
-      tokenClientOwner.publicKey,
-      relayOwner!,
-      true,
-      true,
-      true,
+        tokenClientOwner!,
+        tokenClientOwner.publicKey,
+        relayOwner!,
+        true,
+        true,
+        true,
     );
   });
 
   it("Create local client account trusted address", async () => {
     const client = new TrustedAddress(program.methods);
     await client.create(
-      tokenClientOwner,
-      tokenClientOwner.publicKey,
-      trustedUserAddress.publicKey,
-      chainId
+        tokenClientOwner,
+        tokenClientOwner.publicKey,
+        trustedUserAddress.publicKey,
+        chainId
     );
   });
 
   it("Create client account sender", async () => {
     const client = new ClientSender(program.methods);
     await client.create(
-      tokenClientOwner,
-      tokenClientOwner.publicKey,
-      tokenClientOwner.publicKey
+        tokenClientOwner,
+        tokenClientOwner.publicKey,
+        tokenClientOwner.publicKey
     );
   });
 
@@ -95,11 +94,11 @@ describe("Asterizm client send message tests", () => {
     outgoingTransferHash = sha256.array(payloadSerialized);
 
     await message.initSend(
-      tokenClientOwner,
-      chainId,
-      Buffer.from(payload),
-      txId,
-      outgoingTransferHash
+        tokenClientOwner,
+        chainId,
+        Buffer.from(payload),
+        txId,
+        outgoingTransferHash
     );
   });
 
@@ -110,16 +109,16 @@ describe("Asterizm client send message tests", () => {
     const dstAddress = trustedUserAddress.publicKey;
 
     await message.send(
-      tokenClientOwner,
-      srcAddress!,
-      dstAddress,
-      relayOwner!,
-      systemRelayOwner!,
-      localChainId!,
-      chainId,
-      txId,
-      outgoingTransferHash!,
-      value
+        tokenClientOwner,
+        srcAddress!,
+        dstAddress,
+        relayOwner!,
+        systemRelayOwner!,
+        localChainId!,
+        chainId,
+        txId,
+        outgoingTransferHash!,
+        value
     );
   });
 });

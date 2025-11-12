@@ -68,8 +68,6 @@ pub mod asterizm_initializer {
         _chain_id: u64,
         _user_address: Pubkey,
     ) -> Result<()> {
-
-        
         Ok(())
     }
 

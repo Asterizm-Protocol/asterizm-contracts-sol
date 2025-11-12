@@ -22,7 +22,7 @@ describe("Asterizm client send message for token example tests", () => {
   let relayerSettingsPda: null | PublicKey = null;
   let localChainId: null | BN = null;
   const chainId = new BN(1);
-  const amount = new BN(998);
+  const amount = new BN(866);
   const value = new BN(999);
   const name = "asterizm";
 
@@ -32,7 +32,7 @@ describe("Asterizm client send message for token example tests", () => {
     await fundWalletWithSOL(payer.publicKey);
     relayerSettingsPda = getSettingsPda(RELAYER_PROGRAM_ID);
     const settings = await program.account.relayerSettings.fetch(
-      relayerSettingsPda!
+        relayerSettingsPda!
     );
     systemRelayOwner = settings.systemRelayerOwner;
     relayOwner = payer!.publicKey;
@@ -51,13 +51,13 @@ describe("Asterizm client send message for token example tests", () => {
     const txId = new BN(0);
 
     const trustedAddressPda = getTrustedAccountPda(
-      CLIENT_PROGRAM_ID,
-      srcAddress,
-      chainId
+        CLIENT_PROGRAM_ID,
+        srcAddress,
+        chainId
     );
 
     const clientTrustedAddress =
-      await program.account.clientTrustedAddress.fetch(trustedAddressPda);
+        await program.account.clientTrustedAddress.fetch(trustedAddressPda);
 
     const dstAddress = clientTrustedAddress.address;
 
@@ -79,16 +79,16 @@ describe("Asterizm client send message for token example tests", () => {
     const transferHash = sha256.array(payloadSerialized);
 
     await message.send(
-      tokenClientOwner,
-      srcAddress,
-      dstAddress,
-      relayOwner!,
-      systemRelayOwner!,
-      localChainId!,
-      chainId,
-      txId,
-      transferHash,
-      value
+        tokenClientOwner,
+        srcAddress,
+        dstAddress,
+        relayOwner!,
+        systemRelayOwner!,
+        localChainId!,
+        chainId,
+        txId,
+        transferHash,
+        value
     );
   });
 });

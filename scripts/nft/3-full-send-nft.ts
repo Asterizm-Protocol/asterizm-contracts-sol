@@ -266,12 +266,6 @@ const main = async () => {
         relayPayload = event.data.payload;
     }
 
-
-
-
-
-
-
     const relayInstructions = await (new RelayMessage(programRelay.methods)).transferInstruction(
         payer1!,
         payer1!.publicKey,
@@ -282,7 +276,6 @@ const main = async () => {
         txId,
         sendTransferHash,
         clientAccountPda,
-        dstTrustedAddressPda
     );
 
     tx = new Transaction();

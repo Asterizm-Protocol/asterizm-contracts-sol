@@ -570,41 +570,6 @@
           }
         },
         {
-          "name": "trusted_address",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  116,
-                  114,
-                  117,
-                  115,
-                  116,
-                  101,
-                  100,
-                  95,
-                  97,
-                  100,
-                  100,
-                  114,
-                  101,
-                  115,
-                  115
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "dst_address"
-              },
-              {
-                "kind": "arg",
-                "path": "src_chain_id"
-              }
-            ]
-          }
-        },
-        {
           "name": "transfer_account",
           "writable": true
         },
@@ -789,7 +754,7 @@
         },
         {
           "name": "relayer_program",
-          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
+          "address": "GLP7KdL93NsDsNqaXzPr8WSpZwWFY8vm3LvWHCXFyfLa"
         }
       ],
       "args": [
@@ -1209,7 +1174,7 @@
         },
         {
           "name": "relayer_program",
-          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
+          "address": "GLP7KdL93NsDsNqaXzPr8WSpZwWFY8vm3LvWHCXFyfLa"
         }
       ],
       "args": [
@@ -1535,11 +1500,11 @@
         },
         {
           "name": "relayer_program",
-          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
+          "address": "GLP7KdL93NsDsNqaXzPr8WSpZwWFY8vm3LvWHCXFyfLa"
         },
         {
           "name": "initializer_program",
-          "address": "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
+          "address": "8gcZkpNm81onRUTz9V1kmazE7dPKxcNFtNwZzN5UNtXK"
         },
         {
           "name": "system_program",
@@ -1736,11 +1701,11 @@
         },
         {
           "name": "relayer_program",
-          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
+          "address": "GLP7KdL93NsDsNqaXzPr8WSpZwWFY8vm3LvWHCXFyfLa"
         },
         {
           "name": "initializer_program",
-          "address": "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
+          "address": "8gcZkpNm81onRUTz9V1kmazE7dPKxcNFtNwZzN5UNtXK"
         },
         {
           "name": "system_program",
@@ -1984,7 +1949,7 @@
         },
         {
           "name": "program",
-          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
+          "address": "5ELHWKFxsoSx83q7F4odAHiriNvbyE9ZXqotU44wCRJQ"
         },
         {
           "name": "program_data"

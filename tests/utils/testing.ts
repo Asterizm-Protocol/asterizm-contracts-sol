@@ -94,4 +94,5 @@ export const nftClientOwner = anchor.web3.Keypair.generate();
 export const valueClientOwner = anchor.web3.Keypair.generate();
 export const nftMint = anchor.web3.Keypair.generate();
 export const nftTrustedUserAddress = anchor.web3.Keypair.generate();
-
+export const tokenSystemAccount = anchor.web3.Keypair.generate();
+export const trustedUserAddress = anchor.web3.Keypair.generate();

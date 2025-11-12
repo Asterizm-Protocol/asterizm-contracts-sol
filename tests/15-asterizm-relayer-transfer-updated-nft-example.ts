@@ -4,9 +4,8 @@ import { AsterizmRelayer } from "../target/types/asterizm_relayer";
 import {
   getClientAccountPda,
   getNftClientAccountPda,
-  getTrustedAccountPda,
 } from "../sdk/ts/pda";
-import { getPayerFromConfig, nftClientOwner } from "./utils/testing";
+import { getPayerFromConfig, nftClientOwner, nftTrustedUserAddress } from "./utils/testing";
 import { fundWalletWithSOL } from "../sdk/ts/utils";
 import { Keypair } from "@solana/web3.js";
 import BN from "bn.js";
@@ -35,8 +34,8 @@ describe("Asterizm relayer transfer message for update nft example", () => {
   it("Transfer Message", async () => {
     const message = new RelayMessage(program.methods);
     const dstAddress = getNftClientAccountPda(
-      NFT_EXAMPLE_PROGRAM_ID,
-      nftClientOwner.publicKey
+        NFT_EXAMPLE_PROGRAM_ID,
+        nftClientOwner.publicKey
     );
     const to = payer!.publicKey;
     const id = payer!.publicKey.toBuffer();
@@ -49,16 +48,7 @@ describe("Asterizm relayer transfer message for update nft example", () => {
 
     const clientAccountPda = getClientAccountPda(CLIENT_PROGRAM_ID, dstAddress);
 
-    const trustedAddressPda = getTrustedAccountPda(
-      CLIENT_PROGRAM_ID,
-      dstAddress,
-      chainId
-    );
-
-    const clientTrustedAddress =
-      await program.account.clientTrustedAddress.fetch(trustedAddressPda);
-
-    const srcAddress = clientTrustedAddress.address;
+    const srcAddress = nftTrustedUserAddress.publicKey;
 
     const payloadSerialized = serializePayloadEthers({
       dstAddress,
@@ -72,16 +62,15 @@ describe("Asterizm relayer transfer message for update nft example", () => {
     const incomingTransferHash = sha256.array(payloadSerialized);
 
     await message.transfer(
-      payer!,
-      payer!.publicKey,
-      chainId,
-      srcAddress,
-      localChainId,
-      dstAddress,
-      txId,
-      incomingTransferHash,
-      clientAccountPda,
-      trustedAddressPda
+        payer!,
+        payer!.publicKey,
+        chainId,
+        srcAddress,
+        localChainId,
+        dstAddress,
+        txId,
+        incomingTransferHash,
+        clientAccountPda,
     );
   });
 });
