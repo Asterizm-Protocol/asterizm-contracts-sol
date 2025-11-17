@@ -5,21 +5,21 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-asterizm-client = "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
-asterizm-initializer = "AsE15Mep8EJundywoGRs2XbKY28HghJ7HZ4b7qN3uiJc"
-asterizm-nft-example = "AsGHptNAzEa1UXw4mWRy1WXmBsi11CMaZ2RJ9p6cn1SF"
-asterizm-token-example = "AsUG3qmKKMjEYZDCTqo4hJEnLmxGj82SDGiXci1hNFBx"
-asterizm-value-example = "AsWKK9AMhadUi2GX7BptSCqyhLJBeCXoKbytoF28AuKR"
 asterizm_relayer = "AsXCTmPnyFfxYGrymtL4wa56tk2GTBPu2q2nRAktMWyW"
+asterizm-initializer = "AsE15Mep8EJundywoGRs2XbKY28HghJ7HZ4b7qN3uiJc"
+asterizm-client = "As34Rx7ZJKc6JETxaYSZ7fHUkmhhBLhLzjMdTXJTuXDS"
+asterizm-token-example = "AsUG3qmKKMjEYZDCTqo4hJEnLmxGj82SDGiXci1hNFBx"
+asterizm-nft-example = "AsGHptNAzEa1UXw4mWRy1WXmBsi11CMaZ2RJ9p6cn1SF"
+asterizm-value-example = "AsWKK9AMhadUi2GX7BptSCqyhLJBeCXoKbytoF28AuKR"
 asterizm-native-token-example = "AsNXcUZTtBVYRp6D7m2oGa3st9LhDCyDhXtpqjLcqRo2"
 
 [programs.mainnet]
-asterizm-client = "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
-asterizm-initializer = "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
-asterizm-nft-example = "ASPAGH1992btTDvmLELAWAAzj9J5tLyaDHdW4qaYxsnG"
-asterizm-token-example = "ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s"
-asterizm-value-example = "ASXrQjsqRT6YsE3xYio4i2LKjbLrGQqG4BQ77VfUsmEV"
 asterizm_relayer = "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
+asterizm-initializer = "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
+asterizm-client = "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
+asterizm-token-example = "ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s"
+asterizm-nft-example = "ASPAGH1992btTDvmLELAWAAzj9J5tLyaDHdW4qaYxsnG"
+asterizm-value-example = "ASXrQjsqRT6YsE3xYio4i2LKjbLrGQqG4BQ77VfUsmEV"
 asterizm-native-token-example = "ASzKeKfU6HM6NZHdmuQL31uvU1Hw8Foj8y6Myky6Wp47"
 
 [registry]

@@ -754,7 +754,7 @@
         },
         {
           "name": "relayer_program",
-          "address": "GLP7KdL93NsDsNqaXzPr8WSpZwWFY8vm3LvWHCXFyfLa"
+          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
         }
       ],
       "args": [
@@ -1174,7 +1174,7 @@
         },
         {
           "name": "relayer_program",
-          "address": "GLP7KdL93NsDsNqaXzPr8WSpZwWFY8vm3LvWHCXFyfLa"
+          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
         }
       ],
       "args": [
@@ -1500,11 +1500,11 @@
         },
         {
           "name": "relayer_program",
-          "address": "GLP7KdL93NsDsNqaXzPr8WSpZwWFY8vm3LvWHCXFyfLa"
+          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
         },
         {
           "name": "initializer_program",
-          "address": "8gcZkpNm81onRUTz9V1kmazE7dPKxcNFtNwZzN5UNtXK"
+          "address": "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
         },
         {
           "name": "system_program",
@@ -1701,11 +1701,11 @@
         },
         {
           "name": "relayer_program",
-          "address": "GLP7KdL93NsDsNqaXzPr8WSpZwWFY8vm3LvWHCXFyfLa"
+          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
         },
         {
           "name": "initializer_program",
-          "address": "8gcZkpNm81onRUTz9V1kmazE7dPKxcNFtNwZzN5UNtXK"
+          "address": "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
         },
         {
           "name": "system_program",
@@ -1949,7 +1949,7 @@
         },
         {
           "name": "program",
-          "address": "5ELHWKFxsoSx83q7F4odAHiriNvbyE9ZXqotU44wCRJQ"
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
         },
         {
           "name": "program_data"
