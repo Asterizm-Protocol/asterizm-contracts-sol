@@ -1,0 +1,1217 @@
+{
+  "address": "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ",
+  "metadata": {
+    "name": "asterizm_initializer",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Asterizm initializer"
+  },
+  "instructions": [
+    {
+      "name": "block_account",
+      "discriminator": [
+        211,
+        224,
+        222,
+        101,
+        90,
+        246,
+        174,
+        47
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "blocked_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  111,
+                  99,
+                  107,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "chain_id"
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "chain_id",
+          "type": "u64"
+        },
+        {
+          "name": "user_address",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "init_transfer",
+      "discriminator": [
+        174,
+        50,
+        134,
+        99,
+        122,
+        243,
+        243,
+        224
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "dst_account",
+          "writable": true
+        },
+        {
+          "name": "transfer_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  110,
+                  99,
+                  111,
+                  109,
+                  105,
+                  110,
+                  103,
+                  95,
+                  116,
+                  114,
+                  97,
+                  110,
+                  115,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "dst_address"
+              },
+              {
+                "kind": "arg",
+                "path": "transfer_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "blocked_src_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  111,
+                  99,
+                  107,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "src_chain_id"
+              },
+              {
+                "kind": "arg",
+                "path": "src_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "blocked_dst_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  111,
+                  99,
+                  107,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "settings_account.local_chain_id",
+                "account": "InitializerSettings"
+              },
+              {
+                "kind": "arg",
+                "path": "dst_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "client_program",
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
+        },
+        {
+          "name": "client_account"
+        },
+        {
+          "name": "client_transfer_account",
+          "writable": true
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "dst_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "src_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "src_chain_id",
+          "type": "u64"
+        },
+        {
+          "name": "tx_id",
+          "type": "u128"
+        },
+        {
+          "name": "transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "settings_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "local_chain_id",
+          "type": "u64"
+        },
+        {
+          "name": "manager",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "resend_message",
+      "discriminator": [
+        62,
+        74,
+        77,
+        0,
+        50,
+        33,
+        223,
+        126
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "relayer_settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "relayer_program"
+            }
+          }
+        },
+        {
+          "name": "system_relay_account_owner",
+          "writable": true
+        },
+        {
+          "name": "relay_account"
+        },
+        {
+          "name": "relay_account_owner",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "relayer_program",
+          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "transfer_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  117,
+                  116,
+                  103,
+                  111,
+                  105,
+                  110,
+                  103,
+                  95,
+                  116,
+                  114,
+                  97,
+                  110,
+                  115,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "src_address"
+              },
+              {
+                "kind": "arg",
+                "path": "transfer_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "relay_owner",
+          "type": "pubkey"
+        },
+        {
+          "name": "src_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "value",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "send_message",
+      "discriminator": [
+        57,
+        40,
+        34,
+        178,
+        189,
+        10,
+        65,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "relayer_settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "relayer_program"
+            }
+          }
+        },
+        {
+          "name": "system_relay_account_owner",
+          "writable": true
+        },
+        {
+          "name": "relay_account"
+        },
+        {
+          "name": "relay_account_owner",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "chain_account"
+        },
+        {
+          "name": "relayer_program",
+          "address": "ASYphRUbL2UEdjMQMLm6g2XjU3JfxTikz491TGMuADQk"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "blocked_src_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  111,
+                  99,
+                  107,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "settings_account.local_chain_id",
+                "account": "InitializerSettings"
+              },
+              {
+                "kind": "arg",
+                "path": "src_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "blocked_dst_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  111,
+                  99,
+                  107,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "dst_chain_id"
+              },
+              {
+                "kind": "arg",
+                "path": "dst_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transfer_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  117,
+                  116,
+                  103,
+                  111,
+                  105,
+                  110,
+                  103,
+                  95,
+                  116,
+                  114,
+                  97,
+                  110,
+                  115,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "src_address"
+              },
+              {
+                "kind": "arg",
+                "path": "transfer_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "relay_owner",
+          "type": "pubkey"
+        },
+        {
+          "name": "dst_chain_id",
+          "type": "u64"
+        },
+        {
+          "name": "src_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "dst_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "tx_id",
+          "type": "u128"
+        },
+        {
+          "name": "transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "transfer_result_notify_flag",
+          "type": "bool"
+        },
+        {
+          "name": "value",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "transfer_sending_result",
+      "discriminator": [
+        7,
+        175,
+        233,
+        73,
+        106,
+        136,
+        204,
+        168
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "client_program",
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
+        },
+        {
+          "name": "client_account"
+        },
+        {
+          "name": "instruction_sysvar_account",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "dst_address",
+          "type": "pubkey"
+        },
+        {
+          "name": "transfer_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "status_code",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "unblock_account",
+      "discriminator": [
+        6,
+        27,
+        18,
+        22,
+        208,
+        252,
+        21,
+        71
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "settings_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "blocked_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  108,
+                  111,
+                  99,
+                  107,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "chain_id"
+              },
+              {
+                "kind": "arg",
+                "path": "user_address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_chain_id",
+          "type": "u64"
+        },
+        {
+          "name": "_user_address",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "update_settings",
+      "discriminator": [
+        81,
+        166,
+        51,
+        213,
+        158,
+        84,
+        157,
+        108
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "settings_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program",
+          "address": "AS8bAxBaWmxdPfigyeo3T6Lua9u68UtGFLWnYRrzG5tQ"
+        },
+        {
+          "name": "program_data"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "manager",
+          "type": "pubkey"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BlockedAccount",
+      "discriminator": [
+        227,
+        209,
+        198,
+        155,
+        99,
+        193,
+        183,
+        55
+      ]
+    },
+    {
+      "name": "InitializerSettings",
+      "discriminator": [
+        108,
+        187,
+        231,
+        24,
+        254,
+        251,
+        223,
+        156
+      ]
+    },
+    {
+      "name": "RelayerSettings",
+      "discriminator": [
+        163,
+        153,
+        144,
+        216,
+        27,
+        163,
+        189,
+        82
+      ]
+    },
+    {
+      "name": "TransferAccount",
+      "discriminator": [
+        166,
+        217,
+        148,
+        252,
+        107,
+        104,
+        0,
+        90
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "BlockAccountEvent",
+      "discriminator": [
+        215,
+        1,
+        231,
+        120,
+        127,
+        157,
+        225,
+        33
+      ]
+    },
+    {
+      "name": "CreateInitializerSettingsEvent",
+      "discriminator": [
+        117,
+        195,
+        18,
+        144,
+        247,
+        120,
+        233,
+        252
+      ]
+    },
+    {
+      "name": "IncomingEvent",
+      "discriminator": [
+        148,
+        113,
+        227,
+        250,
+        219,
+        186,
+        254,
+        100
+      ]
+    },
+    {
+      "name": "OutgoingEvent",
+      "discriminator": [
+        252,
+        77,
+        129,
+        59,
+        51,
+        246,
+        60,
+        244
+      ]
+    },
+    {
+      "name": "UpdateInitializerSettingsEvent",
+      "discriminator": [
+        246,
+        102,
+        229,
+        50,
+        69,
+        173,
+        107,
+        230
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "BlockAccountEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "chain_id",
+            "type": "u64"
+          },
+          {
+            "name": "user_address",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BlockedAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "is_blocked",
+            "type": "bool"
+          },
+          {
+            "name": "chain_id",
+            "type": "u64"
+          },
+          {
+            "name": "user_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateInitializerSettingsEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "manager",
+            "type": "pubkey"
+          },
+          {
+            "name": "local_chain_id",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncomingEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "transfer_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializerSettings",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "is_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "manager",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "local_chain_id",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OutgoingEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "transfer_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RelayerSettings",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "is_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "manager",
+            "type": "pubkey"
+          },
+          {
+            "name": "system_relayer_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "local_chain_id",
+            "type": "u64"
+          },
+          {
+            "name": "system_fee",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TransferAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "exists",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateInitializerSettingsEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "manager",
+            "type": "pubkey"
+          }
+        ]
+      }
+    }
+  ]
+}
