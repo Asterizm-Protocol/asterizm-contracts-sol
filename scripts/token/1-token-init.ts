@@ -187,7 +187,7 @@ const main = async () => {
         );
     }
 
-    if (response.mustCreateSender > 0) {
+    if (response.mustCreateSender != '0') {
         const clientSender = new ClientSender(programToken.methods);
         await clientSender.create(payer!, name, payer!.publicKey);
     }

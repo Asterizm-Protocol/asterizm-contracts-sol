@@ -168,3 +168,21 @@ Scripts folder contains useful scripts to configure `Solana` programs. To run us
 ```bash
 npx ts-node scripts/<..>.ts
 ```
+
+
+## How to get internal addresses
+
+### Client minted token address:
+Token mint transaction -> 1.2 instruction -> `mint` param in Instruction Data
+
+### Client user address (ClientUserAddress in off-chain module):
+Token mint transaction -> 1.2 instruction -> `mintAuthority` param in Instruction Data
+
+### Trusted address (for another chain):
+Token mint transaction -> 1.2 instruction -> `mintAuthority` param in Instruction Data
+
+### Owner fee token account (OwnerTokenAddress in off-chain config):
+AssociatedTokenAccount transaction (1-token-init:152, first create token account tx) -> 1.4 instruction -> `Account` param
+
+### System fee token account (SystemFeeTokenAddress in off-chain config):
+AssociatedTokenAccount transaction (1-token-init:162, second create token account tx) -> 1.4 instruction -> `Account` param

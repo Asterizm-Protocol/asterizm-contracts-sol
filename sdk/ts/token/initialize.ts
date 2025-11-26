@@ -41,6 +41,16 @@ export class InitializeToken {
         tokenClientAccount
     );
 
+    console.log({
+        'Authority address': authority.publicKey.toString(),
+        'Token example ID': TOKEN_EXAMPLE_PROGRAM_ID.toString(),
+        'Client program  ID': CLIENT_PROGRAM_ID.toString(),
+        'Token name': name,
+        'Token client account': tokenClientAccount.toString(),
+        'Client program settings': clientProgramSettings.toString(),
+        'Client Account': clientAccount.toString(),
+    });
+
     await this.programAPI
         .createMint(
             name,
