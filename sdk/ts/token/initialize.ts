@@ -158,6 +158,44 @@ export class InitializeToken {
         .rpc();
   }
 
+    async updateClientParams(
+        authority: Keypair,
+        name: string,
+        relayOwner: PublicKey,
+        notifyTransferSendingResult: boolean,
+        disableHashValidation: boolean,
+        refundEnabled: boolean
+    ) {
+        const tokenClientAccount = getTokenClientAccountPda(
+            TOKEN_EXAMPLE_PROGRAM_ID,
+            authority.publicKey,
+            name
+        );
+
+        const clientProgramSettings = getSettingsPda(CLIENT_PROGRAM_ID);
+        const clientAccount = getClientAccountPda(
+            CLIENT_PROGRAM_ID,
+            tokenClientAccount
+        );
+
+        await this.programAPI
+            .updateClientParams(
+                name,
+                relayOwner,
+                notifyTransferSendingResult,
+                disableHashValidation,
+                refundEnabled
+            )
+            .accountsPartial({
+                authority: authority.publicKey,
+                tokenClientAccount,
+                clientProgramSettings,
+                clientAccount,
+            })
+            .signers([authority])
+            .rpc();
+    }
+
   async addMeta(
       authority: Keypair,
       name: string,

@@ -1877,6 +1877,101 @@ export type AsterizmTokenExample = {
       ]
     },
     {
+      "name": "updateClientParams",
+      "discriminator": [
+        143,
+        26,
+        80,
+        124,
+        198,
+        104,
+        101,
+        128
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "tokenClientAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "arg",
+                "path": "name"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  116,
+                  101,
+                  114,
+                  105,
+                  122,
+                  109,
+                  45,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "clientProgramSettings"
+        },
+        {
+          "name": "clientAccount",
+          "writable": true
+        },
+        {
+          "name": "clientProgram",
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "relayOwner",
+          "type": "pubkey"
+        },
+        {
+          "name": "notifyTransferSendingResult",
+          "type": "bool"
+        },
+        {
+          "name": "disableHashValidation",
+          "type": "bool"
+        },
+        {
+          "name": "refundEnabled",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "updateFee",
       "discriminator": [
         232,

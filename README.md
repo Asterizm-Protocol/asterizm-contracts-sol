@@ -47,7 +47,7 @@ solana program deploy --program-id ./keys/<program-id>.json ./target/deploy/<..>
 
 ### Upgrade
 ```bash
-anchor upgrade <target/deploy/program.so> --program-id <program-id>
+anchor upgrade <target/deploy/program.so> --program-id <program-id> --provider.cluster <mainnet|devnet>
 ``` 
 or
 ```bash

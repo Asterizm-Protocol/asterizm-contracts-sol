@@ -1871,6 +1871,101 @@
       ]
     },
     {
+      "name": "update_client_params",
+      "discriminator": [
+        143,
+        26,
+        80,
+        124,
+        198,
+        104,
+        101,
+        128
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_client_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "arg",
+                "path": "_name"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  116,
+                  101,
+                  114,
+                  105,
+                  122,
+                  109,
+                  45,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "client_program_settings"
+        },
+        {
+          "name": "client_account",
+          "writable": true
+        },
+        {
+          "name": "client_program",
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
+        }
+      ],
+      "args": [
+        {
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "name": "relay_owner",
+          "type": "pubkey"
+        },
+        {
+          "name": "notify_transfer_sending_result",
+          "type": "bool"
+        },
+        {
+          "name": "disable_hash_validation",
+          "type": "bool"
+        },
+        {
+          "name": "refund_enabled",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "update_fee",
       "discriminator": [
         232,

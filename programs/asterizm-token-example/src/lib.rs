@@ -275,6 +275,34 @@ mod asterizm_token_example {
         Ok(())
     }
 
+    pub fn update_client_params(
+        ctx: Context<UpdateClientParams>,
+        _name: String,
+        relay_owner: Pubkey,
+        notify_transfer_sending_result: bool,
+        disable_hash_validation: bool,
+        refund_enabled: bool,
+    ) -> Result<()> {
+        let seeds: &[&[_]] = &[
+            &ctx.accounts.token_client_account.authority.to_bytes(),
+            _name.as_bytes(),
+            b"asterizm-token-client",
+            &[ctx.accounts.token_client_account.bump],
+        ];
+        let signer: &[&[&[u8]]] = &[&seeds[..]];
+
+        asterizm_client::cpi::update_client(
+            ctx.accounts.to_update_client_cpi(signer),
+            ctx.accounts.token_client_account.key(),
+            relay_owner,
+            notify_transfer_sending_result,
+            disable_hash_validation,
+            refund_enabled,
+        )?;
+
+        Ok(())
+    }
+
     pub fn update_fee(
         ctx: Context<UpdateFee>,
         _name: String,
@@ -965,6 +993,40 @@ pub struct UpdateFee<'info> {
         bump = token_client_account.bump,
     )]
     pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+}
+
+#[derive(Accounts)]
+#[instruction(_name: String)]
+pub struct UpdateClientParams<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(mut,
+        seeds = [&authority.key().as_ref(), _name.as_bytes(), b"asterizm-token-client"],
+        bump = token_client_account.bump,
+    )]
+    pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+    /// CHECK: This is not dangerous because we will check it inside client
+    pub client_program_settings: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we will check it inside client
+    #[account(mut)]
+    pub client_account: UncheckedAccount<'info>,
+    pub client_program: Program<'info, AsterizmClient>,
+}
+
+impl<'a, 'b, 'c, 'info> UpdateClientParams<'info> {
+    fn to_update_client_cpi(
+        &self,
+        seeds: &'a [&'b [&'c [u8]]],
+    ) -> CpiContext<'a, 'b, 'c, 'info, asterizm_client::cpi::accounts::UpdateClient<'info>> {
+        let cpi_accounts = asterizm_client::cpi::accounts::UpdateClient {
+            payer: self.authority.to_account_info(),
+            authority: self.token_client_account.to_account_info(),
+            settings_account: self.client_program_settings.to_account_info(),
+            client_account: self.client_account.to_account_info(),
+        };
+        let cpi_program = self.client_program.to_account_info();
+        CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)
+    }
 }
 
 #[derive(Accounts)]

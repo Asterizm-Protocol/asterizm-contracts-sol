@@ -128,7 +128,7 @@ const main = async () => {
             payer!,
             name,
             decimals,
-            response.relayOwnerAddress == '0' ? payer!.publicKey : response.relayOwnerAddress,
+            response.relayOwnerAddress == '0' ? payer!.publicKey : new PublicKey(response.relayOwnerAddress),
             true,
             true,
             true,
