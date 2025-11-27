@@ -68,6 +68,12 @@ const main = async () => {
             initial: '3MPcEphc8VTuotbFKbnotg1bYoUTtdinCYFkNPEEUUR6',
         },
         {
+            type: "text",
+            name: "relayOwnerAddress",
+            message: "Relay owner address (for mainnet - FzFFcBizVrx55qmnd1WwLDQwyuWkTwHBodCpBtsiF6PX, for testnet - 0, using one owner for all)",
+            initial: '0',
+        },
+        {
             type: "number",
             name: "fee",
             message: "User fee (user fee in native coins)",
@@ -122,7 +128,7 @@ const main = async () => {
             payer!,
             name,
             decimals,
-            payer!.publicKey,
+            response.relayOwnerAddress == '0' ? payer!.publicKey : response.relayOwnerAddress,
             true,
             true,
             true,
