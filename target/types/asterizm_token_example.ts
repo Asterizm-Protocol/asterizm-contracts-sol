@@ -721,6 +721,226 @@ export type AsterizmTokenExample = {
       ]
     },
     {
+      "name": "disableMintForClient",
+      "discriminator": [
+        228,
+        19,
+        56,
+        109,
+        207,
+        253,
+        247,
+        49
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "tokenClientAccount",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "tokenClientOwner"
+              },
+              {
+                "kind": "arg",
+                "path": "name"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  116,
+                  101,
+                  114,
+                  105,
+                  122,
+                  109,
+                  45,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mintEnableAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "tokenClientAccount"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  45,
+                  101,
+                  110,
+                  97,
+                  98,
+                  108,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program",
+          "address": "ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s"
+        },
+        {
+          "name": "programData"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "tokenClientOwner",
+          "type": "pubkey"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "enableMintForClient",
+      "discriminator": [
+        163,
+        252,
+        49,
+        57,
+        188,
+        193,
+        132,
+        43
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "tokenClientAccount",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "tokenClientOwner"
+              },
+              {
+                "kind": "arg",
+                "path": "name"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  116,
+                  101,
+                  114,
+                  105,
+                  122,
+                  109,
+                  45,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mintEnableAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "tokenClientAccount"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  45,
+                  101,
+                  110,
+                  97,
+                  98,
+                  108,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program",
+          "address": "ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s"
+        },
+        {
+          "name": "programData"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "tokenClientOwner",
+          "type": "pubkey"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "mintToUser",
       "discriminator": [
         75,
@@ -774,6 +994,33 @@ export type AsterizmTokenExample = {
                   101,
                   110,
                   116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mintEnableAccount",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "tokenClientAccount"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  45,
+                  101,
+                  110,
+                  97,
+                  98,
+                  108,
+                  101
                 ]
               }
             ]
@@ -2076,6 +2323,19 @@ export type AsterizmTokenExample = {
       ]
     },
     {
+      "name": "mintEnableAccount",
+      "discriminator": [
+        19,
+        189,
+        184,
+        73,
+        154,
+        178,
+        250,
+        129
+      ]
+    },
+    {
       "name": "refundTransferAccount",
       "discriminator": [
         3,
@@ -2221,6 +2481,18 @@ export type AsterizmTokenExample = {
             "name": "chainId",
             "type": "u64"
           },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "mintEnableAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
             "name": "bump",
             "type": "u8"

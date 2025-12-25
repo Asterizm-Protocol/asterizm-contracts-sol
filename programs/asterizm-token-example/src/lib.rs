@@ -3,10 +3,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 use anchor_spl::metadata::Metadata;
 use anchor_spl::token::*;
-use mpl_token_metadata::{
-    instructions::CreateV1CpiBuilder,
-    types::TokenStandard,
-};
+use mpl_token_metadata::{instructions::CreateV1CpiBuilder, types::TokenStandard};
 
 declare_id!("ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s");
 
@@ -14,6 +11,7 @@ declare_program!(asterizm_client);
 
 use crate::asterizm_client::accounts::{ClientAccount, ClientTrustedAddress, TransferAccount};
 use crate::asterizm_client::program::AsterizmClient;
+use crate::program::AsterizmTokenExample;
 
 #[program]
 mod asterizm_token_example {
@@ -29,13 +27,15 @@ mod asterizm_token_example {
         dst_chain_id: u64,
     ) -> Result<()> {
         // Calculate fees
-        let owner_fee = (amount * ctx.accounts.token_client_account.owner_fee_rate) / 10000;
-        let system_fee = (amount * ctx.accounts.token_client_account.system_fee_rate) / 10000;
+        let owner_fee = (amount.saturating_mul(ctx.accounts.token_client_account.owner_fee_rate))
+            .saturating_div(10000);
+        let system_fee = (amount.saturating_mul(ctx.accounts.token_client_account.system_fee_rate))
+            .saturating_div(10000);
         let total_fees = owner_fee.saturating_add(system_fee);
         if total_fees >= amount {
             return Err(ProgramError::InvalidInstructionData.into());
         }
-        let actual_amount = amount - total_fees;
+        let actual_amount = amount.saturating_sub(total_fees);
 
         // transfer SOL fee to token authority
         let fee = ctx.accounts.token_client_account.fee;
@@ -127,9 +127,18 @@ mod asterizm_token_example {
         )?;
 
         // Calculate fees on received amount
-        let owner_fee = (data.amount * ctx.accounts.token_client_account.owner_fee_rate) / 10000;
-        let system_fee = (data.amount * ctx.accounts.token_client_account.system_fee_rate) / 10000;
-        let actual_mint_amount = data.amount.saturating_sub(owner_fee).saturating_sub(system_fee);
+        let owner_fee = (data
+            .amount
+            .saturating_mul(ctx.accounts.token_client_account.owner_fee_rate))
+        .saturating_div(10000);
+        let system_fee = (data
+            .amount
+            .saturating_mul(ctx.accounts.token_client_account.system_fee_rate))
+        .saturating_div(10000);
+        let actual_mint_amount = data
+            .amount
+            .saturating_sub(owner_fee)
+            .saturating_sub(system_fee);
 
         let seeds: &[&[_]] = &[
             &ctx.accounts.token_client_account.authority.to_bytes(),
@@ -229,6 +238,23 @@ mod asterizm_token_example {
         let signer: &[&[&[u8]]] = &[&seeds[..]];
 
         mint_to(ctx.accounts.to_mint_cpi(signer), amount)
+    }
+
+    pub fn enable_mint_for_client(
+        ctx: Context<EnableMintForClient>,
+        _token_client_owner: Pubkey,
+        _name: String,
+    ) -> Result<()> {
+        ctx.accounts.mint_enable_account.bump = ctx.bumps.mint_enable_account;
+        Ok(())
+    }
+
+    pub fn disable_mint_for_client(
+        _ctx: Context<DisableMintForClient>,
+        _token_client_owner: Pubkey,
+        _name: String,
+    ) -> Result<()> {
+        Ok(())
     }
 
     pub fn create_mint(
@@ -712,6 +738,11 @@ pub struct MintToUser<'info> {
         bump = token_client_account.bump,
     )]
     pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+    #[account(
+        seeds = [token_client_account.key().as_ref(), b"mint-enable"],
+        bump = mint_enable_account.bump,
+    )]
+    pub mint_enable_account: Account<'info, MintEnableAccount>,
     #[account(mut)]
     pub mint: Account<'info, Mint>,
     #[account(
@@ -744,6 +775,14 @@ pub struct TokenClientAccount {
     pub owner_fee_rate: u64,
     pub system_fee_rate: u64,
     pub system_fee_address: Pubkey,
+    pub bump: u8,
+}
+
+pub const MINT_ENABLE_ACCOUNT_LEN: usize = 1; // bump
+
+#[account]
+#[derive(Default)]
+pub struct MintEnableAccount {
     pub bump: u8,
 }
 
@@ -1218,4 +1257,57 @@ pub struct AddMeta<'info> {
     /// CHECK: account constraints checked in account trait
     #[account(address = sysvar::instructions::id())]
     pub instruction_sysvar_account: AccountInfo<'info>,
+}
+
+#[derive(Accounts)]
+#[instruction(_token_client_owner: Pubkey, _name: String)]
+pub struct EnableMintForClient<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+        seeds = [_token_client_owner.key().as_ref(), _name.as_bytes(), b"asterizm-token-client"],
+        bump = token_client_account.bump,
+    )]
+    pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+    #[account(
+        init,
+        payer = authority,
+        space = 8 + MINT_ENABLE_ACCOUNT_LEN,
+        seeds = [token_client_account.key().as_ref(), b"mint-enable"],
+        bump
+    )]
+    pub mint_enable_account: Account<'info, MintEnableAccount>,
+    #[account(constraint = program.programdata_address() == Ok(Some(program_data.key())))]
+    pub program: Program<'info, AsterizmTokenExample>,
+    #[account(
+        constraint = program_data.upgrade_authority_address == Some(authority.key())
+    )]
+    pub program_data: Account<'info, ProgramData>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+#[instruction(_token_client_owner: Pubkey, _name: String)]
+pub struct DisableMintForClient<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+        seeds = [_token_client_owner.key().as_ref(), _name.as_bytes(), b"asterizm-token-client"],
+        bump = token_client_account.bump,
+    )]
+    pub token_client_account: Box<Account<'info, TokenClientAccount>>,
+    #[account(
+        mut,
+        close = authority,
+        seeds = [token_client_account.key().as_ref(), b"mint-enable"],
+        bump = mint_enable_account.bump,
+    )]
+    pub mint_enable_account: Account<'info, MintEnableAccount>,
+    #[account(constraint = program.programdata_address() == Ok(Some(program_data.key())))]
+    pub program: Program<'info, AsterizmTokenExample>,
+    #[account(
+        constraint = program_data.upgrade_authority_address == Some(authority.key())
+    )]
+    pub program_data: Account<'info, ProgramData>,
+    pub system_program: Program<'info, System>,
 }

@@ -1,10 +1,10 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AsterizmRelayer } from "../target/types/asterizm_relayer";
-import {getClientAccountPda, getTokenClientAccountPda} from "../sdk/ts/pda";
+import {getClientAccountPda, getIncomingTransferAccountPda, getTokenClientAccountPda} from "../sdk/ts/pda";
 import {getPayerFromConfig, tokenClientOwner, trustedUserAddress} from "./utils/testing";
 import { fundWalletWithSOL } from "../sdk/ts/utils";
-import { Keypair } from "@solana/web3.js";
+import { Keypair, sendAndConfirmRawTransaction, SystemProgram, Transaction } from "@solana/web3.js";
 import BN from "bn.js";
 import { RelayMessage } from "../sdk/ts/relayer/message";
 import {CLIENT_PROGRAM_ID, TOKEN_EXAMPLE_PROGRAM_ID} from "../sdk/ts/program";
@@ -58,6 +58,32 @@ describe("Asterizm relayer transfer message for token example", () => {
     });
 
     const incomingTransferHash = sha256.array(payloadSerialized);
+
+
+    const clientTransferAccountPda = getIncomingTransferAccountPda(
+        CLIENT_PROGRAM_ID,
+        dstAddress,
+        incomingTransferHash
+    );
+
+    let tx = new Transaction();
+    tx.add( SystemProgram.transfer({
+      fromPubkey: payer!.publicKey,
+      toPubkey: clientTransferAccountPda,
+      lamports: 1_000_000,
+    }));
+    tx.feePayer = payer!.publicKey;
+    let latestBlockhash = await provider.connection.getLatestBlockhash();
+    tx.recentBlockhash = latestBlockhash.blockhash;
+    tx.sign(payer!);
+
+    const clientTxHash = await sendAndConfirmRawTransaction(provider.connection, tx.serialize(), {
+      commitment: "confirmed",
+    });
+    const clientTx = await anchor.getProvider().connection.getTransaction(clientTxHash, {
+      commitment: "confirmed",
+    });
+
 
     await message.transfer(
         payer!,

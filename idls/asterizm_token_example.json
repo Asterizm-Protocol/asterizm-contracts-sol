@@ -715,6 +715,226 @@
       ]
     },
     {
+      "name": "disable_mint_for_client",
+      "discriminator": [
+        228,
+        19,
+        56,
+        109,
+        207,
+        253,
+        247,
+        49
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_client_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "_token_client_owner"
+              },
+              {
+                "kind": "arg",
+                "path": "_name"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  116,
+                  101,
+                  114,
+                  105,
+                  122,
+                  109,
+                  45,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint_enable_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "token_client_account"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  45,
+                  101,
+                  110,
+                  97,
+                  98,
+                  108,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program",
+          "address": "ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s"
+        },
+        {
+          "name": "program_data"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_token_client_owner",
+          "type": "pubkey"
+        },
+        {
+          "name": "_name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "enable_mint_for_client",
+      "discriminator": [
+        163,
+        252,
+        49,
+        57,
+        188,
+        193,
+        132,
+        43
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_client_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "_token_client_owner"
+              },
+              {
+                "kind": "arg",
+                "path": "_name"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  116,
+                  101,
+                  114,
+                  105,
+                  122,
+                  109,
+                  45,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint_enable_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "token_client_account"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  45,
+                  101,
+                  110,
+                  97,
+                  98,
+                  108,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program",
+          "address": "ASWxijC9aT8vjBHm91AED6BjEEeZC5oSRVXwcSTgkd3s"
+        },
+        {
+          "name": "program_data"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_token_client_owner",
+          "type": "pubkey"
+        },
+        {
+          "name": "_name",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "mint_to_user",
       "discriminator": [
         75,
@@ -768,6 +988,33 @@
                   101,
                   110,
                   116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint_enable_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "token_client_account"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  45,
+                  101,
+                  110,
+                  97,
+                  98,
+                  108,
+                  101
                 ]
               }
             ]
@@ -1871,6 +2118,101 @@
       ]
     },
     {
+      "name": "update_client_params",
+      "discriminator": [
+        143,
+        26,
+        80,
+        124,
+        198,
+        104,
+        101,
+        128
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_client_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "arg",
+                "path": "_name"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  116,
+                  101,
+                  114,
+                  105,
+                  122,
+                  109,
+                  45,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  99,
+                  108,
+                  105,
+                  101,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "client_program_settings"
+        },
+        {
+          "name": "client_account",
+          "writable": true
+        },
+        {
+          "name": "client_program",
+          "address": "AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7"
+        }
+      ],
+      "args": [
+        {
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "name": "relay_owner",
+          "type": "pubkey"
+        },
+        {
+          "name": "notify_transfer_sending_result",
+          "type": "bool"
+        },
+        {
+          "name": "disable_hash_validation",
+          "type": "bool"
+        },
+        {
+          "name": "refund_enabled",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "update_fee",
       "discriminator": [
         232,
@@ -1972,6 +2314,19 @@
         223,
         5,
         154
+      ]
+    },
+    {
+      "name": "MintEnableAccount",
+      "discriminator": [
+        19,
+        189,
+        184,
+        73,
+        154,
+        178,
+        250,
+        129
       ]
     },
     {
@@ -2120,6 +2475,18 @@
             "name": "chain_id",
             "type": "u64"
           },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintEnableAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
             "name": "bump",
             "type": "u8"

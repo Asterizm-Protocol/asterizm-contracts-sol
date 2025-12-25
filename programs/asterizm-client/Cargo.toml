@@ -22,5 +22,5 @@ anchor-debug = []
 [dependencies]
 anchor-lang = "0.32.1"
 solana-program = "2.3.0"
-# hex = "*"
-# base64 = "*"
+ hex = "*"
+ base64 = "*"

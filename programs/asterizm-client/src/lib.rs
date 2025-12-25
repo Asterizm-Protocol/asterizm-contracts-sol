@@ -13,10 +13,10 @@ pub use models::*;
 #[program]
 pub mod asterizm_client {
     use super::*;
-    use solana_program::hash::hash;
     use anchor_lang::solana_program::program::invoke_signed;
     use anchor_lang::solana_program::system_instruction;
     use anchor_lang::solana_program::sysvar::instructions::get_instruction_relative;
+    use solana_program::hash::hash;
 
     pub fn initialize(
         ctx: Context<Initialize>,
@@ -345,35 +345,66 @@ pub mod asterizm_client {
             return Err(ProgramError::InvalidArgument.into());
         }
 
-        let incoming_transfer_account_signer_seeds: &[&[_]] = &[
-            br"incoming_transfer",
-            &user_address.to_bytes(),
-            &transfer_hash,
-            &[incoming_transfer_bump],
-        ];
+        let transfer_account_res = {
+            let transfer_account = ctx.accounts.transfer_account.data.borrow_mut();
+            TransferAccount::try_from_slice(&transfer_account)
+        };
+        let transfer_account_cloned = ctx.accounts.transfer_account.clone();
+        let transfer_account_key = ctx.accounts.transfer_account.key();
 
-        if let Ok(mut transfer_account) = TransferAccount::try_deserialize(
-            &mut &**ctx.accounts.transfer_account.try_borrow_mut_data()?,
-        ) {
+        let transfer_accont = if let Ok(mut transfer_account) = transfer_account_res {
             transfer_account.refunded = true;
             transfer_account
-                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
         } else {
+            let required_lamports = ctx
+                .accounts
+                .rent
+                .minimum_balance(TRANSFER_ACCOUNT_LEN + 8)
+                .max(1)
+                .saturating_sub(transfer_account_cloned.lamports());
+
+            if required_lamports > 0 {
+                msg!("Transfer {} lamports to the new account", required_lamports);
+                invoke_signed(
+                    &system_instruction::transfer(
+                        &ctx.accounts.authority.key(),
+                        &transfer_account_key,
+                        required_lamports,
+                    ),
+                    &[
+                        ctx.accounts.authority.to_account_info(),
+                        transfer_account_cloned.clone(),
+                        ctx.accounts.system_program.to_account_info(),
+                    ],
+                    &[],
+                )?;
+            }
+
+            let accounts = &[
+                transfer_account_cloned,
+                ctx.accounts.system_program.to_account_info(),
+            ];
+
+            let incoming_transfer_account_signer_seeds: &[&[_]] = &[
+                br"incoming_transfer",
+                &user_address.to_bytes(),
+                &transfer_hash,
+                &[incoming_transfer_bump],
+            ];
+
             invoke_signed(
-                &system_instruction::create_account(
-                    &ctx.accounts.authority.key(),
-                    &ctx.accounts.transfer_account.key(),
-                    1.max(ctx.accounts.rent.minimum_balance(TRANSFER_ACCOUNT_LEN + 8)),
-                    (TRANSFER_ACCOUNT_LEN + 8) as u64,
-                    &ID,
+                &system_instruction::allocate(
+                    &transfer_account_key,
+                    (TRANSFER_ACCOUNT_LEN + 8).try_into().unwrap(),
                 ),
-                &[
-                    ctx.accounts.authority.to_account_info(),
-                    ctx.accounts.transfer_account.clone(),
-                    ctx.accounts.rent.to_account_info(),
-                    ctx.accounts.system_program.to_account_info(),
-                ],
-                &[incoming_transfer_account_signer_seeds],
+                accounts,
+                &[&incoming_transfer_account_signer_seeds],
+            )?;
+
+            invoke_signed(
+                &system_instruction::assign(&transfer_account_key, &ID),
+                accounts,
+                &[&incoming_transfer_account_signer_seeds],
             )?;
 
             // Init Transfer Account
@@ -385,8 +416,9 @@ pub mod asterizm_client {
             };
 
             transfer_account_data
-                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
-        }
+        };
+
+        transfer_accont.try_serialize(&mut *ctx.accounts.transfer_account.data.borrow_mut())?;
 
         Ok(())
     }
@@ -422,29 +454,66 @@ pub mod asterizm_client {
             return Err(ProgramError::InvalidArgument.into());
         }
 
-        let incoming_transfer_account_signer_seeds: &[&[_]] = &[
-            br"incoming_transfer",
-            &dst_address.to_bytes(),
-            &transfer_hash,
-            &[incoming_transfer_bump],
-        ];
+        let transfer_account_res = {
+            let transfer_account = ctx.accounts.transfer_account.data.borrow_mut();
+            TransferAccount::try_from_slice(&transfer_account)
+        };
+        let transfer_account_cloned = ctx.accounts.transfer_account.clone();
+        let transfer_account_key = ctx.accounts.transfer_account.key();
 
-        if ctx.accounts.transfer_account.lamports() == 0 {
+        let transfer_accont = if let Ok(mut transfer_account) = transfer_account_res {
+            transfer_account.success_receive = true;
+            transfer_account
+        } else {
+            let required_lamports = ctx
+                .accounts
+                .rent
+                .minimum_balance(TRANSFER_ACCOUNT_LEN + 8)
+                .max(1)
+                .saturating_sub(transfer_account_cloned.lamports());
+
+            if required_lamports > 0 {
+                msg!("Transfer {} lamports to the new account", required_lamports);
+                invoke_signed(
+                    &system_instruction::transfer(
+                        &ctx.accounts.authority.key(),
+                        &transfer_account_key,
+                        required_lamports,
+                    ),
+                    &[
+                        ctx.accounts.authority.to_account_info(),
+                        transfer_account_cloned.clone(),
+                        ctx.accounts.system_program.to_account_info(),
+                    ],
+                    &[],
+                )?;
+            }
+
+            let accounts = &[
+                transfer_account_cloned,
+                ctx.accounts.system_program.to_account_info(),
+            ];
+
+            let incoming_transfer_account_signer_seeds: &[&[_]] = &[
+                br"incoming_transfer",
+                &dst_address.to_bytes(),
+                &transfer_hash,
+                &[incoming_transfer_bump],
+            ];
+
             invoke_signed(
-                &system_instruction::create_account(
-                    &ctx.accounts.authority.key(),
-                    &ctx.accounts.transfer_account.key(),
-                    1.max(ctx.accounts.rent.minimum_balance(TRANSFER_ACCOUNT_LEN + 8)),
-                    (TRANSFER_ACCOUNT_LEN + 8) as u64,
-                    &ID,
+                &system_instruction::allocate(
+                    &transfer_account_key,
+                    (TRANSFER_ACCOUNT_LEN + 8).try_into().unwrap(),
                 ),
-                &[
-                    ctx.accounts.authority.to_account_info(),
-                    ctx.accounts.transfer_account.clone(),
-                    ctx.accounts.rent.to_account_info(),
-                    ctx.accounts.system_program.to_account_info(),
-                ],
-                &[incoming_transfer_account_signer_seeds],
+                accounts,
+                &[&incoming_transfer_account_signer_seeds],
+            )?;
+
+            invoke_signed(
+                &system_instruction::assign(&transfer_account_key, &ID),
+                accounts,
+                &[&incoming_transfer_account_signer_seeds],
             )?;
 
             // Init Transfer Account
@@ -456,15 +525,9 @@ pub mod asterizm_client {
             };
 
             transfer_account_data
-                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
-        } else {
-            let mut transfer_account = TransferAccount::try_deserialize(
-                &mut &**ctx.accounts.transfer_account.try_borrow_mut_data()?,
-            )?;
-            transfer_account.success_receive = true;
-            transfer_account
-                .try_serialize(&mut *ctx.accounts.transfer_account.try_borrow_mut_data()?)?;
-        }
+        };
+
+        transfer_accont.try_serialize(&mut *ctx.accounts.transfer_account.data.borrow_mut())?;
 
         emit!(PayloadReceivedEvent {
             src_chain_id,

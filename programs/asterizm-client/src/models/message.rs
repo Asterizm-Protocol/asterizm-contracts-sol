@@ -373,63 +373,79 @@ pub struct TransferSendingResultEvent {
     pub status_code: u8,
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use std::str::FromStr;
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
 
-//     use super::*;
+    use super::*;
 
-//     #[test]
-//     pub fn check_hash() {
-//         let message = InitMessage {
-//             src_chain_id: 0x1111111111111111,
-//             src_address: Pubkey::from_str("3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3").unwrap(),
-//             dst_chain_id: 0x3333333333333333,
-//             dst_address: Pubkey::from_str("5bV6jUfhDHCQVA1WfKBUnXUsboJgoKgkzkKcxr3joew5").unwrap(),
-//             tx_id: 0x55555555555555555555555555555555,
-//             payload: hex::decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").unwrap(),
-//         };
+    #[test]
+    pub fn check_hash() {
+        // let message = InitMessage {
+        //     src_chain_id: 0x1111111111111111,
+        //     src_address: Pubkey::from_str("3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3").unwrap(),
+        //     dst_chain_id: 0x3333333333333333,
+        //     dst_address: Pubkey::from_str("5bV6jUfhDHCQVA1WfKBUnXUsboJgoKgkzkKcxr3joew5").unwrap(),
+        //     tx_id: 0x55555555555555555555555555555555,
+        //     payload: hex::decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").unwrap(),
+        // };
 
-//         let buffer = serialize_init_message_eth(message);
-//         println!("buffer = 0x{}", hex::encode(&buffer));
-//         // let buffer = [0xaa; 127];
+        // let buffer = serialize_init_message_eth(message);
+        // println!("buffer = 0x{}", hex::encode(&buffer));
+        // // let buffer = [0xaa; 127];
 
-//         let hash = build_crosschain_hash(&buffer);
-//         println!("build_crosschain_hash = 0x{}", hex::encode(hash));
+        // let hash = build_crosschain_hash(&buffer);
+        // println!("build_crosschain_hash = 0x{}", hex::encode(hash));
 
+        // let message = InitMessage {
+        //     src_chain_id: 0x1111111111111111,
+        //     src_address: Pubkey::from_str("3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3").unwrap(),
+        //     dst_chain_id: 0x3333333333333333,
+        //     dst_address: Pubkey::from_str("5bV6jUfhDHCQVA1WfKBUnXUsboJgoKgkzkKcxr3joew5").unwrap(),
+        //     tx_id: 0x55555555555555555555555555555555,
+        //     payload: hex::decode("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB").unwrap(),
+        // };
 
-//         let message = InitMessage {
-//             src_chain_id: 0x1111111111111111,
-//             src_address: Pubkey::from_str("3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3").unwrap(),
-//             dst_chain_id: 0x3333333333333333,
-//             dst_address: Pubkey::from_str("5bV6jUfhDHCQVA1WfKBUnXUsboJgoKgkzkKcxr3joew5").unwrap(),
-//             tx_id: 0x55555555555555555555555555555555,
-//             payload: hex::decode("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB").unwrap(),
-//         };
+        // let buffer = serialize_init_message_eth(message);
+        // println!("buffer = 0x{}", hex::encode(&buffer));
 
-//         let buffer = serialize_init_message_eth(message);
-//         println!("buffer = 0x{}", hex::encode(&buffer));
-//         // let buffer = [0xaa; 127];
+        // let hash = build_crosschain_hash(&buffer);
+        // println!("build_crosschain_hash = 0x{}", hex::encode(hash));
 
-//         let hash = build_crosschain_hash(&buffer);
-//         println!("build_crosschain_hash = 0x{}", hex::encode(hash));
+        let message = InitMessage {
+            src_chain_id: 70001,
+            src_address: Pubkey::from_str("B4XJw6UJbTtPcEd9HyVBbVq23EbdQvA4criqyVyGdxGB").unwrap(),
+            dst_chain_id: 97,
+            dst_address: Pubkey::from_str("1111111111113C6WPEahzkMeBwLPZ487yfoPkDTz").unwrap(),
+            tx_id: 6,
+            payload: hex::decode("0000000000000000000000009f3e4bcac4fe2f444648c024e6e75360cd41c544000000000000000000000000000000000000000000000000000000003b9aca000000000000000000000000000000000000000000000000000000000000000006").unwrap(),
+        };
 
-//         // let buffer = [0xbb; 126];
-//         // println!(
-//             // "buffer = 0x{}, len = {}",
-//             // hex::encode(&buffer),
-//             // buffer.len()
-//         // );
+        let buffer = serialize_init_message_eth(message);
+        println!("buffer = 0x{}", hex::encode(&buffer));
 
-//         // let hash = build_crosschain_hash(&buffer);
-//         // println!("build_crosschain_hash = 0x{}", hex::encode(hash));
+        let hash = solana_program::hash::hash(&buffer);
+        println!("regular hash = 0x{}", hex::encode(hash));
 
-//         // let hash = solana_program::hash::hash(&buffer);
-//         // println!("regular hash = 0x{}", hex::encode(hash));
+        let hash = build_crosschain_hash(&buffer);
+        println!("build_crosschain_hash = 0x{}", hex::encode(hash));
 
-//         // let data = base64::decode("ao2ZtXt6GeRBnAAAAAAAALdn4pW3r+OJESL8qODD9WNrQ4tv6v55oXrRLLMsxqG5IQAAAAAAAAAAAAAAAAAAAADFfmyycLG6PxioflC9vAUilqUg//XNqZ4ogJaFNIVLYAAAABxEo4c/F0WduPlrA7fyDIatCHubreAYL7P0iORp6iXxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALLQXgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQ==").unwrap();
-//         // println!("data = 0x{}", hex::encode(&data));
-//         // let event = InitiateTransferEvent::try_from_slice(&data[8..]).unwrap();
-//         // println!("hash event = 0x{}", hex::encode(event.transfer_hash));
-//     }
-// }
+        // let buffer = [0xbb; 126];
+        // println!(
+        // "buffer = 0x{}, len = {}",
+        // hex::encode(&buffer),
+        // buffer.len()
+        // );
+
+        // let hash = build_crosschain_hash(&buffer);
+        // println!("build_crosschain_hash = 0x{}", hex::encode(hash));
+
+        // let hash = solana_program::hash::hash(&buffer);
+        // println!("regular hash = 0x{}", hex::encode(hash));
+
+        // let data = base64::decode("ao2ZtXt6GeRBnAAAAAAAALdn4pW3r+OJESL8qODD9WNrQ4tv6v55oXrRLLMsxqG5IQAAAAAAAAAAAAAAAAAAAADFfmyycLG6PxioflC9vAUilqUg//XNqZ4ogJaFNIVLYAAAABxEo4c/F0WduPlrA7fyDIatCHubreAYL7P0iORp6iXxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALLQXgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQ==").unwrap();
+        // println!("data = 0x{}", hex::encode(&data));
+        // let event = InitiateTransferEvent::try_from_slice(&data[8..]).unwrap();
+        // println!("hash event = 0x{}", hex::encode(event.transfer_hash));
+    }
+}

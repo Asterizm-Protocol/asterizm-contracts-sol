@@ -1,8 +1,8 @@
 use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
-use anchor_spl::token::*;
 use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::token::*;
 
 declare_id!("ASzKeKfU6HM6NZHdmuQL31uvU1Hw8Foj8y6Myky6Wp47");
 
