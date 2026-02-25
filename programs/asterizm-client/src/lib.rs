@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("AS3bpxoN9oWBZ1MusjZKQr9WjuTbG3T3W5fk521wNgb7");
+declare_id!("BmM4yS6KnzsZqziXV46QkqJReDkHgad5euxBFQA6rbkk");
 
 declare_program!(asterizm_initializer);
 
@@ -214,20 +214,50 @@ pub mod asterizm_client {
             return Err(ProgramError::InvalidArgument.into());
         }
 
+        let transfer_account_cloned = ctx.accounts.transfer_account.clone();
+        let transfer_account_key = ctx.accounts.transfer_account.key();
+
+        let required_lamports = ctx
+            .accounts
+            .rent
+            .minimum_balance(TRANSFER_ACCOUNT_LEN + 8)
+            .max(1)
+            .saturating_sub(transfer_account_cloned.lamports());
+
+        if required_lamports > 0 {
+            msg!("Transfer {} lamports to the new account", required_lamports);
+            invoke_signed(
+                &system_instruction::transfer(
+                    &ctx.accounts.signer.key(),
+                    &transfer_account_key,
+                    required_lamports,
+                ),
+                &[
+                    ctx.accounts.signer.to_account_info(),
+                    transfer_account_cloned.clone(),
+                    ctx.accounts.system_program.to_account_info(),
+                ],
+                &[],
+            )?;
+        }
+
+        let accounts = &[
+            transfer_account_cloned,
+            ctx.accounts.system_program.to_account_info(),
+        ];
+
         invoke_signed(
-            &system_instruction::create_account(
-                &ctx.accounts.signer.key(),
-                &ctx.accounts.transfer_account.key(),
-                1.max(ctx.accounts.rent.minimum_balance(TRANSFER_ACCOUNT_LEN + 8)),
-                (TRANSFER_ACCOUNT_LEN + 8) as u64,
-                &ID,
+            &system_instruction::allocate(
+                &transfer_account_key,
+                (TRANSFER_ACCOUNT_LEN + 8).try_into().unwrap(),
             ),
-            &[
-                ctx.accounts.signer.to_account_info(),
-                ctx.accounts.transfer_account.clone(),
-                ctx.accounts.rent.to_account_info(),
-                ctx.accounts.system_program.to_account_info(),
-            ],
+            accounts,
+            &[outgoing_transfer_account_signer_seeds],
+        )?;
+
+        invoke_signed(
+            &system_instruction::assign(&transfer_account_key, &ID),
+            accounts,
             &[outgoing_transfer_account_signer_seeds],
         )?;
 
